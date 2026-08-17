@@ -1,0 +1,35 @@
+# Full L=20 deeper-layers rerun on the Compute Canada GPU allocation --
+# addresses the open finding in local_only/quantum_implementation_current_status.md.
+#
+# The original framing was "near-critical only" (h=0.95-1.2 at 6-7% error),
+# but the raw results/vqe_sim/20/*.json data shows h=0.4 (deep ferromagnetic
+# phase) is equally bad at 7.08%, while only h=0.8 (1.57%) and h=1.6 (0.08%)
+# were actually fine at 10 layers. h=1.6 is excluded here since it's already
+# accurate; the rest are rerun with more depth.
+#
+# Two distinct mechanisms are in play, per configs/vqe_phase1_validation.yaml's
+# comment: near h_c, the HVA's nearest-neighbor gates spread correlations only
+# ~1 site/layer, so a fixed-depth circuit can't span the diverging correlation
+# length once L exceeds the circuit's reach; at h=0.4 the ground state is
+# GHZ-like, which is a genuine ansatz-expressiveness limit rather than a
+# correlation-length one. Both should improve with more layers, but the
+# amount needed may differ -- worth checking in the write-up.
+#
+# n_layers = [16, 20, 24, 30] scans depth from below L up to 1.5x L, mirroring
+# the L<=10 diagnostic (4/10 layers) that originally motivated n_layers=10 --
+# now checking where accuracy saturates at L=20 specifically.
+#
+# Run configs/vqe_gpu_L20_timing_test.yaml first -- confirms the GPU is
+# actually being used and gives a real per-point time estimate before
+# launching this (6 h-values x 4 layer counts = 24 points).
+method: vqe_gpu
+J: 1.0
+
+L_values: [20]
+h_values: [0.4, 0.8, 0.95, 1.0, 1.05, 1.2]
+
+train:
+  n_layers: [16, 20, 24, 30]
+  n_steps: 600
+  stepsize: 0.1
+  seed: 0

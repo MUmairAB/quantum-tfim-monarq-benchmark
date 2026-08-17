@@ -15,12 +15,16 @@ qiskit-calculquebec @ git+https://github.com/calculquebec/qiskit-calculquebec.gi
 # MonarQ connectivity (PennyLane path) + VQE
 pennylane==0.45.1
 pennylane-calculquebec==0.8.2
+# VQE training loop (src/vqe.py) is JAX/optax-based so it runs on GPU
+# automatically wherever jax[cuda12] is installed — see the jax note below.
+optax==0.2.8
 
 # NNQS
 netket==3.22.3
 # jax 0.10.2, not 0.11.0 — 0.11.0 requires Python >=3.12, Compute Canada runs 3.11.
 jax==0.10.2
-# On a GPU machine, install jax[cuda12] instead of plain jax to get GPU support.
+# On a GPU machine, install jax[cuda12] instead of plain jax to get GPU support
+# (needed for both NNQS training and the VQE GPU sweep in configs/vqe_gpu_*.yaml).
 
 # Exact diagonalization (needs OpenMP at the system level — on macOS: brew install libomp)
 # On Compute Canada, this alone isn't enough — see setup_computecanada.sh.

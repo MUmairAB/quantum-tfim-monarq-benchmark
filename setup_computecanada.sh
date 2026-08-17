@@ -32,6 +32,16 @@ VENV_DIR="${1:-$HOME/quantum-tfim-env}"
 python3 -m venv "$VENV_DIR"
 "$VENV_DIR/bin/pip" install --index-url https://pypi.org/simple/ -r requirements.txt
 
+# requirements.txt pins plain (CPU) jax for portability. On a GPU allocation,
+# swap in the CUDA build so NNQS training and the VQE GPU sweep
+# (configs/vqe_gpu_*.yaml) actually use the GPU instead of silently falling
+# back to CPU. jax isn't one of the packages Compute Canada's wheelhouse
+# restricts (see the file header), so the normal PyPI index works here too.
+if command -v nvidia-smi &>/dev/null; then
+    echo "GPU detected — installing jax[cuda12] in place of plain jax..."
+    "$VENV_DIR/bin/pip" install --index-url https://pypi.org/simple/ --force-reinstall "jax[cuda12]==0.10.2"
+fi
+
 "$VENV_DIR/bin/pip" install --no-cache-dir --force-reinstall --no-deps quspin-extensions
 "$VENV_DIR/bin/pip" install --no-cache-dir --force-reinstall --no-deps parallel-sparse-tools
 
@@ -41,6 +51,12 @@ from src.exact import ground_state_energy
 E0 = ground_state_energy(6, 1.0, 1.0)
 assert abs(E0 - (-7.29622981)) < 1e-6
 print('OK:', E0)
+"
+
+echo "JAX backend check (should say 'gpu' if nvidia-smi was found above):"
+"$VENV_DIR/bin/python" -c "
+import jax
+print('  backend:', jax.default_backend(), ' devices:', jax.devices())
 "
 
 echo ""

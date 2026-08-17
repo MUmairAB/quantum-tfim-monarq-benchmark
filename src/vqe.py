@@ -3,7 +3,16 @@
 Phase 1, step 3: a first working VQE, simulator only (PennyLane's default.qubit),
 checked against the exact-diagonalization results from src/exact.py. Real MonarQ
 hardware is Phase 3, not this module — confirm before pointing this at anything
-but a local simulator device. Usage:
+but a local simulator device.
+
+Training runs through JAX (jit-compiled, optax Adam) rather than PennyLane's
+own autograd-based optimizer. default.qubit dispatches its array math through
+whichever interface the QNode's parameters use, so with JAX arrays this same
+code runs on GPU automatically once a CUDA-enabled `jax` is installed (see
+requirements.txt) — no device-string change needed. On plain CPU JAX (e.g.
+the local Mac) the identical code path still runs, just without the GPU
+speedup, which is what makes it testable locally before deploying to
+Compute Canada. Usage:
 
     python -m src.vqe --config configs/<sweep>.yaml
 """
@@ -33,10 +42,15 @@ def hva_layer(gamma: float, beta: float, L: int) -> None:
 
 
 def build_circuit(L: int, H, dev):
-    """Build the HVA QNode: Hadamard layer (uniform superposition) then n_layers of hva_layer."""
+    """Build the HVA QNode: Hadamard layer (uniform superposition) then n_layers of hva_layer.
+
+    interface="jax" so the QNode's parameters, execution, and gradients all
+    run through JAX — the thing that lets this dispatch onto GPU under a
+    CUDA-enabled JAX install.
+    """
     import pennylane as qml
 
-    @qml.qnode(dev)
+    @qml.qnode(dev, interface="jax")
     def circuit(params):
         for w in range(L):
             qml.Hadamard(wires=w)
@@ -56,26 +70,55 @@ def train_vqe(
     stepsize: float = 0.1,
     seed: int | None = None,
 ) -> tuple[float, int]:
-    """Train the HVA on PennyLane's default.qubit simulator and return (energy, two_qubit_gate_count).
+    """Train the HVA (JAX, jit-compiled) and return (energy, two_qubit_gate_count).
+
+    Runs on whatever device JAX itself picks up — GPU if a CUDA-enabled JAX
+    is installed and visible, CPU otherwise. Same code either way.
 
     two_qubit_gate_count is (L-1) * n_layers — the IsingZZ gates. This is the
     quantity that actually gates hardware feasibility on MonarQ (Phase 3), so
     it's returned here even though it doesn't matter for simulator runs.
     """
+    import jax
+
+    # JAX defaults to float32/complex64, silently truncating precision below
+    # what the rest of the repo uses (QuSpin, NetKet, and the old autograd
+    # VQE are all float64) — enable x64 explicitly so switching backends
+    # doesn't also switch precision.
+    jax.config.update("jax_enable_x64", True)
+    import jax.numpy as jnp
     import numpy as np
+    import optax
     import pennylane as qml
-    from pennylane import numpy as pnp
 
     dev = qml.device("default.qubit", wires=L)
     H = build_pennylane_hamiltonian(L, h, J)
     circuit = build_circuit(L, H, dev)
 
+    # Params are initialized with plain numpy (not jax.random) so a given
+    # seed produces the exact same starting point as the old autograd-based
+    # implementation — isolates "more layers" as the only thing changing
+    # relative to earlier vqe_sim results.
     rng = np.random.default_rng(seed)
-    params = pnp.array(rng.uniform(0, 2 * np.pi, size=(n_layers, 2)), requires_grad=True)
+    params = jnp.array(rng.uniform(0, 2 * np.pi, size=(n_layers, 2)))
 
-    opt = qml.AdamOptimizer(stepsize=stepsize)
+    # b1/b2/eps match qml.AdamOptimizer's defaults (beta1=0.9, beta2=0.99,
+    # eps=1e-8) exactly — optax.adam's own default beta2 is 0.999, and that
+    # mismatch alone was enough to send this non-convex landscape to a
+    # different local minimum at L=12 during testing. Matching them keeps
+    # "more layers" the only real variable relative to the old vqe_sim results.
+    opt = optax.adam(stepsize, b1=0.9, b2=0.99, eps=1e-8)
+    opt_state = opt.init(params)
+
+    @jax.jit
+    def step(params, opt_state):
+        loss, grads = jax.value_and_grad(circuit)(params)
+        updates, opt_state = opt.update(grads, opt_state)
+        params = optax.apply_updates(params, updates)
+        return params, opt_state
+
     for _ in range(n_steps):
-        params, _ = opt.step_and_cost(circuit, params)
+        params, opt_state = step(params, opt_state)
 
     final_energy = float(circuit(params))
     two_qubit_gate_count = (L - 1) * n_layers
@@ -83,57 +126,81 @@ def train_vqe(
 
 
 def run_sweep(config: dict, results_dir: Path, exact_dir: Path) -> None:
-    """Train the HVA VQE at every (L, h) point in the config and save results + exact comparison.
+    """Train the HVA VQE at every (L, h, n_layers) point in the config and save results + exact comparison.
 
     h-values come from an explicit `h_values` list (small validation sweeps)
     or a `h_grid` spec (build_h_grid kwargs, for matching the full exact sweep).
+    `train.n_layers` can be a single value (as in the original sim sweep) or
+    a list, to scan circuit depth at fixed L/h — used for the L=20 GPU rerun
+    that checks whether more layers resolves the accuracy degradation found
+    at 10 layers. Output filenames only carry a `_layersN` suffix when a scan
+    is actually configured (len > 1), so the original single-depth sweep's
+    file naming (and its resumability against already-existing results) is
+    unaffected.
 
     Resumable: a point whose output file already exists is skipped, so an
     interrupted run (crash, sleep, Ctrl-C) only costs the interrupted point,
     not the whole sweep — just rerun the same command. This matters most for
-    this module: the L=20 leg alone takes on the order of 10 hours.
+    this module: the L=20 leg alone takes on the order of 10 hours per depth.
     """
+    import jax
+
+    jax.config.update("jax_enable_x64", True)
+
     J = config.get("J", 1.0)
     L_values = config["L_values"]
     h_values = config["h_values"] if "h_values" in config else build_h_grid(**config.get("h_grid", {}))
+    method = config.get("method", "vqe_sim")
     train_kwargs = config.get("train", {})
+
+    n_layers_values = train_kwargs.pop("n_layers")
+    if not isinstance(n_layers_values, list):
+        n_layers_values = [n_layers_values]
+    scanning_layers = len(n_layers_values) > 1
+
+    print(f"JAX backend: {jax.default_backend()}  devices: {jax.devices()}")
 
     for L in L_values:
         out_dir = results_dir / str(L)
         out_dir.mkdir(parents=True, exist_ok=True)
         for h in h_values:
-            out_path = out_dir / f"{h:.3f}.json"
-            if out_path.exists():
-                print(f"L={L:<3} h={h:.3f}  already done, skipping -> {out_path}")
-                continue
-            start = time.perf_counter()
-            E, two_qubit_gates = train_vqe(L, h, J, **train_kwargs)
-            elapsed = time.perf_counter() - start
+            for n_layers in n_layers_values:
+                suffix = f"{h:.3f}_layers{n_layers}.json" if scanning_layers else f"{h:.3f}.json"
+                out_path = out_dir / suffix
+                if out_path.exists():
+                    print(f"L={L:<3} h={h:.3f} layers={n_layers:<3}  already done, skipping -> {out_path}")
+                    continue
 
-            E_exact = load_exact_E0(L, h, exact_dir)
-            rel_error = abs(E - E_exact) / abs(E_exact) if E_exact is not None else None
+                run_kwargs = {**train_kwargs, "n_layers": n_layers}
+                start = time.perf_counter()
+                E, two_qubit_gates = train_vqe(L, h, J, **run_kwargs)
+                elapsed = time.perf_counter() - start
 
-            record = {
-                "L": L,
-                "h": h,
-                "J": J,
-                "E0": E,
-                "E0_exact": E_exact,
-                "rel_error": rel_error,
-                "method": "vqe_sim",
-                "device": "default.qubit",
-                "boundary": "open",
-                "two_qubit_gate_count": two_qubit_gates,
-                "wall_time_s": elapsed,
-                **train_kwargs,
-            }
-            out_path.write_text(json.dumps(record, indent=2))
+                E_exact = load_exact_E0(L, h, exact_dir)
+                rel_error = abs(E - E_exact) / abs(E_exact) if E_exact is not None else None
 
-            rel_str = f"{rel_error:.4%}" if rel_error is not None else "n/a (no exact ref)"
-            print(
-                f"L={L:<3} h={h:.3f}  E0={E:.6f}  rel_err={rel_str}  "
-                f"2q_gates={two_qubit_gates}  ({elapsed:.1f}s) -> {out_path}"
-            )
+                record = {
+                    "L": L,
+                    "h": h,
+                    "J": J,
+                    "E0": E,
+                    "E0_exact": E_exact,
+                    "rel_error": rel_error,
+                    "method": method,
+                    "device": "default.qubit",
+                    "jax_backend": jax.default_backend(),
+                    "boundary": "open",
+                    "two_qubit_gate_count": two_qubit_gates,
+                    "wall_time_s": elapsed,
+                    **run_kwargs,
+                }
+                out_path.write_text(json.dumps(record, indent=2))
+
+                rel_str = f"{rel_error:.4%}" if rel_error is not None else "n/a (no exact ref)"
+                print(
+                    f"L={L:<3} h={h:.3f} layers={n_layers:<3}  E0={E:.6f}  rel_err={rel_str}  "
+                    f"2q_gates={two_qubit_gates}  ({elapsed:.1f}s) -> {out_path}"
+                )
 
 
 def main() -> None:

@@ -1,0 +1,26 @@
+# Timing/correctness check for the JAX-backed VQE port, to run first on the
+# Compute Canada GPU allocation before committing to the full layer scan in
+# configs/vqe_gpu_L20_layer_scan.yaml. Two things to check in the output:
+#
+#   1. The "JAX backend:" line printed at sweep start should say "gpu", not
+#      "cpu" -- confirms JAX actually found and used the GPU, not a silent
+#      CPU fallback.
+#   2. Per-point wall-clock time at n_layers=30, to estimate the full scan's
+#      total cost (6 h-values x 4 layer counts = 24 points) before launching it.
+#
+# Single h-value (h=1.0, the critical point) across n_layers = [10, 16, 20,
+# 24, 30]. 10 is included even though results/vqe_sim/20/1.000.json already
+# has this point, specifically to get an apples-to-apples timing comparison
+# between this JAX/optax implementation and the old autograd one on the same
+# (L, h) point.
+method: vqe_gpu
+J: 1.0
+
+L_values: [20]
+h_values: [1.0]
+
+train:
+  n_layers: [10, 16, 20, 24, 30]
+  n_steps: 600
+  stepsize: 0.1
+  seed: 0
