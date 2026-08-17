@@ -1,0 +1,21 @@
+# Not part of the published repo (secrets, hardware-connectivity scripts,
+# local project config/tooling)
+local_only/
+.claude/
+CLAUDE.md
+
+# Python virtualenv (recreate via pip install, see README.md)
+monarq-env/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Logs
+*.log
+
+# OS cruft
+.DS_Store

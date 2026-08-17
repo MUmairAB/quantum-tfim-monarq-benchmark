@@ -1,0 +1,15 @@
+# Phase 1 step 2: NNQS validation against exact diagonalization.
+# Small L (RBM + exact both cheap here); h_values chosen from the exact sweep's
+# own grid (configs/exact_simulation_sweep.yaml) so every point has a direct
+# exact-diagonalization reference in results/exact/.
+J: 1.0
+
+L_values: [4, 6, 8, 10]
+h_values: [0.4, 0.8, 0.95, 1.0, 1.05, 1.2, 1.6]
+
+train:
+  alpha: 2
+  n_samples: 1024
+  n_iter: 300
+  learning_rate: 0.02
+  diag_shift: 0.01

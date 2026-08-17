@@ -1,0 +1,31 @@
+# Top-level dependencies; pip resolves the rest. Tested on macOS/CPU.
+# numpy pinned to 2.4.2, not the newer 2.5.2, to match the newest version
+# available in Compute Canada's constrained wheelhouse (numpy/scipy/mpi4py/
+# pandas/h5py/Cython/grpcio are locked there for binary compatibility with
+# their optimized builds) — keeps both environments on the same version.
+numpy==2.4.2
+matplotlib==3.11.1
+PyYAML==6.0.3
+
+# MonarQ connectivity (Qiskit path)
+# qiskit 2.5.0, not 2.5.2 — newest version with a Compute Canada wheel.
+qiskit==2.5.0
+qiskit-calculquebec @ git+https://github.com/calculquebec/qiskit-calculquebec.git@d21bbb75997b70f9ba269b05f4707aa7173d07a5
+
+# MonarQ connectivity (PennyLane path) + VQE
+pennylane==0.45.1
+pennylane-calculquebec==0.8.2
+
+# NNQS
+netket==3.22.3
+# jax 0.10.2, not 0.11.0 — 0.11.0 requires Python >=3.12, Compute Canada runs 3.11.
+jax==0.10.2
+# On a GPU machine, install jax[cuda12] instead of plain jax to get GPU support.
+
+# Exact diagonalization (needs OpenMP at the system level — on macOS: brew install libomp)
+# On Compute Canada, this alone isn't enough — see setup_computecanada.sh.
+quspin==1.0.1
+
+# Notebooks
+jupyter==1.1.1
+ipykernel==7.3.0
