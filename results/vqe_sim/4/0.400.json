@@ -1,0 +1,17 @@
+{
+  "L": 4,
+  "h": 0.4,
+  "J": 1.0,
+  "E0": -3.2626614357666464,
+  "E0_exact": -3.2641498342647686,
+  "rel_error": 0.00045598350985547373,
+  "method": "vqe_sim",
+  "device": "default.qubit",
+  "boundary": "open",
+  "two_qubit_gate_count": 30,
+  "wall_time_s": 15.927645334013505,
+  "n_layers": 10,
+  "n_steps": 600,
+  "stepsize": 0.1,
+  "seed": 0
+}
