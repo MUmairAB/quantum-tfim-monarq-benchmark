@@ -135,6 +135,7 @@ def evaluate_on_device(
     device: str = "monarq.sim",
     shots: int = 1000,
     client=None,
+    processing_config=None,
 ) -> float:
     """Run an already-trained HVA circuit once on `device` and return the measured energy.
 
@@ -142,9 +143,12 @@ def evaluate_on_device(
     (n_layers, 2)) — this function does no training, just one circuit
     execution per Hamiltonian term with the given shot count. `client` is a
     `MonarqClient` instance, required for the real `monarq.default` backend
-    and unused for `monarq.sim`. Credentials are the caller's responsibility
-    (see `local_only/access_monarq.py`) — this module stays credential-free
-    since it's the part of the repo that's pushed to GitHub.
+    and unused for `monarq.sim`. `processing_config` is a
+    `pennylane_calculquebec.processing.config.ProcessingConfig` — pass one
+    with a readout-mitigation step appended to get mitigated results instead
+    of the plugin's raw default pipeline. Credentials are the caller's
+    responsibility (see `local_only/access_monarq.py`) — this module stays
+    credential-free since it's the part of the repo that's pushed to GitHub.
 
     Measures each Hamiltonian term separately and sums the weighted results
     in plain Python, rather than a single qml.expval(H) call: confirmed by
@@ -167,6 +171,8 @@ def evaluate_on_device(
     device_kwargs = {"wires": L}
     if client is not None:
         device_kwargs["client"] = client
+    if processing_config is not None:
+        device_kwargs["processing_config"] = processing_config
     dev = qml.device(device, **device_kwargs)
 
     H = build_pennylane_hamiltonian(L, h, J)

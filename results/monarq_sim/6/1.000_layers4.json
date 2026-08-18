@@ -1,0 +1,20 @@
+{
+  "L": 6,
+  "h": 1.0,
+  "J": 1.0,
+  "E0_sim_noiseless": -7.229851600817635,
+  "E0_hardware_sim": -1.1639200799200802,
+  "E0_exact": -7.296229810558757,
+  "rel_error_sim": 0.009097604031751182,
+  "rel_error_hardware_sim": 0.840476504970319,
+  "method": "vqe_monarq_sim",
+  "device": "monarq.sim",
+  "mitigation": "none",
+  "two_qubit_gate_count": 20,
+  "n_layers": 4,
+  "n_steps": 600,
+  "stepsize": 0.1,
+  "seed": 0,
+  "shots": 1000,
+  "wall_time_s": 11.178431707987329
+}
