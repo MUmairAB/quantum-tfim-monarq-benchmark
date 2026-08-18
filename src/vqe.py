@@ -1,18 +1,35 @@
 """VQE (Hamiltonian Variational Ansatz) ground-state energy for the open-BC TFIM.
 
-Phase 1, step 3: a first working VQE, simulator only (PennyLane's default.qubit),
-checked against the exact-diagonalization results from src/exact.py. Real MonarQ
-hardware is Phase 3, not this module — confirm before pointing this at anything
-but a local simulator device.
+Phase 1, step 3: a first working VQE, simulator only, checked against the
+exact-diagonalization results from src/exact.py. Real MonarQ hardware is
+Phase 3, not this module — confirm before pointing this at anything but a
+local simulator device.
 
 Training runs through JAX (jit-compiled, optax Adam) rather than PennyLane's
-own autograd-based optimizer. default.qubit dispatches its array math through
-whichever interface the QNode's parameters use, so with JAX arrays this same
-code runs on GPU automatically once a CUDA-enabled `jax` is installed (see
-requirements.txt) — no device-string change needed. On plain CPU JAX (e.g.
-the local Mac) the identical code path still runs, just without the GPU
-speedup, which is what makes it testable locally before deploying to
-Compute Canada. Usage:
+own autograd-based optimizer, on lightning.qubit (PennyLane's C++ backend)
+with diff_method="adjoint" rather than default.qubit's default backprop.
+This combination was arrived at after two things that didn't work for the
+L=20 deeper-layer scan this module was built to run:
+
+  - default.qubit + backprop: backprop keeps the full statevector after
+    every gate for the backward pass, so memory scales with n_layers. At
+    L=20/16 layers this needed ~10GB in one allocation and OOM'd a Compute
+    Canada GPU's 10GB MIG slice.
+  - default.qubit + adjoint (which fixes the memory scaling): correct, but
+    6-44x slower than backprop in local testing, growing worse with L —
+    default.qubit's adjoint isn't well jit-compiled under JAX and appears
+    to fall back to a non-XLA-compiled path per step.
+
+lightning.qubit's adjoint is natively C++, not a JAX-interfaced Python
+fallback: it matched backprop's speed exactly in testing (down to matching
+default.qubit+backprop's wall-clock at L=6/12/16) while keeping memory
+~O(2^L) regardless of depth, same as any adjoint method. It's CPU-only, not
+GPU — but since it already matches the speed we'd measured on Compute
+Canada's GPU while sidestepping the memory ceiling entirely, and needs no
+new dependency (pennylane-lightning ships as part of a plain `pennylane`
+install), it's the simulator this module actually uses now. The device name
+is still config-driven (see run_sweep's `device` key) in case a GPU-native
+adjoint device (e.g. lightning.gpu) is worth revisiting later. Usage:
 
     python -m src.vqe --config configs/<sweep>.yaml
 """
@@ -45,12 +62,13 @@ def build_circuit(L: int, H, dev):
     """Build the HVA QNode: Hadamard layer (uniform superposition) then n_layers of hva_layer.
 
     interface="jax" so the QNode's parameters, execution, and gradients all
-    run through JAX — the thing that lets this dispatch onto GPU under a
-    CUDA-enabled JAX install.
+    run through JAX. diff_method="adjoint" keeps memory ~O(2^L) regardless
+    of circuit depth — see the module docstring for why this needs to be
+    paired with lightning.qubit specifically, not just any device.
     """
     import pennylane as qml
 
-    @qml.qnode(dev, interface="jax")
+    @qml.qnode(dev, interface="jax", diff_method="adjoint")
     def circuit(params):
         for w in range(L):
             qml.Hadamard(wires=w)
@@ -69,11 +87,9 @@ def train_vqe(
     n_steps: int = 200,
     stepsize: float = 0.1,
     seed: int | None = None,
+    device: str = "lightning.qubit",
 ) -> tuple[float, int]:
-    """Train the HVA (JAX, jit-compiled) and return (energy, two_qubit_gate_count).
-
-    Runs on whatever device JAX itself picks up — GPU if a CUDA-enabled JAX
-    is installed and visible, CPU otherwise. Same code either way.
+    """Train the HVA (JAX, jit-compiled, adjoint diff) and return (energy, two_qubit_gate_count).
 
     two_qubit_gate_count is (L-1) * n_layers — the IsingZZ gates. This is the
     quantity that actually gates hardware feasibility on MonarQ (Phase 3), so
@@ -91,7 +107,7 @@ def train_vqe(
     import optax
     import pennylane as qml
 
-    dev = qml.device("default.qubit", wires=L)
+    dev = qml.device(device, wires=L)
     H = build_pennylane_hamiltonian(L, h, J)
     circuit = build_circuit(L, H, dev)
 
@@ -151,6 +167,7 @@ def run_sweep(config: dict, results_dir: Path, exact_dir: Path) -> None:
     L_values = config["L_values"]
     h_values = config["h_values"] if "h_values" in config else build_h_grid(**config.get("h_grid", {}))
     method = config.get("method", "vqe_sim")
+    device = config.get("device", "lightning.qubit")
     train_kwargs = config.get("train", {})
 
     n_layers_values = train_kwargs.pop("n_layers")
@@ -158,6 +175,10 @@ def run_sweep(config: dict, results_dir: Path, exact_dir: Path) -> None:
         n_layers_values = [n_layers_values]
     scanning_layers = len(n_layers_values) > 1
 
+    # jax.default_backend() reflects JAX's own array ops (the optimizer/glue
+    # code), not what ran the circuit simulation itself — that's whatever
+    # `device` (below, in each result record) says. lightning.qubit always
+    # simulates in C++ on CPU regardless of what JAX itself defaults to.
     print(f"JAX backend: {jax.default_backend()}  devices: {jax.devices()}")
 
     for L in L_values:
@@ -171,7 +192,7 @@ def run_sweep(config: dict, results_dir: Path, exact_dir: Path) -> None:
                     print(f"L={L:<3} h={h:.3f} layers={n_layers:<3}  already done, skipping -> {out_path}")
                     continue
 
-                run_kwargs = {**train_kwargs, "n_layers": n_layers}
+                run_kwargs = {**train_kwargs, "n_layers": n_layers, "device": device}
                 start = time.perf_counter()
                 E, two_qubit_gates = train_vqe(L, h, J, **run_kwargs)
                 elapsed = time.perf_counter() - start
@@ -187,7 +208,6 @@ def run_sweep(config: dict, results_dir: Path, exact_dir: Path) -> None:
                     "E0_exact": E_exact,
                     "rel_error": rel_error,
                     "method": method,
-                    "device": "default.qubit",
                     "jax_backend": jax.default_backend(),
                     "boundary": "open",
                     "two_qubit_gate_count": two_qubit_gates,

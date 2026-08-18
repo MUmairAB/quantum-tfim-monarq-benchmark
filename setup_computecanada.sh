@@ -33,10 +33,12 @@ python3 -m venv "$VENV_DIR"
 "$VENV_DIR/bin/pip" install --index-url https://pypi.org/simple/ -r requirements.txt
 
 # requirements.txt pins plain (CPU) jax for portability. On a GPU allocation,
-# swap in the CUDA build so NNQS training and the VQE GPU sweep
-# (configs/vqe_gpu_*.yaml) actually use the GPU instead of silently falling
-# back to CPU. jax isn't one of the packages Compute Canada's wheelhouse
-# restricts (see the file header), so the normal PyPI index works here too.
+# swap in the CUDA build so NNQS training actually uses the GPU instead of
+# silently falling back to CPU. (VQE — src/vqe.py — runs on lightning.qubit
+# regardless of this; it doesn't benefit from GPU jax, see requirements.txt's
+# comment there for why.) jax isn't one of the packages Compute Canada's
+# wheelhouse restricts (see the file header), so the normal PyPI index works
+# here too.
 if command -v nvidia-smi &>/dev/null; then
     echo "GPU detected — installing jax[cuda12] in place of plain jax..."
     "$VENV_DIR/bin/pip" install --index-url https://pypi.org/simple/ --force-reinstall "jax[cuda12]==0.10.2"
@@ -66,3 +68,10 @@ echo ""
 echo "Every new terminal session needs the same env vars unset before using"
 echo "this venv — add to your shell profile if this will be a recurring pain:"
 echo "  unset PIP_PREFIX EBPYTHONPREFIXES EBPYTHONPREFIXES_PRIORITY"
+echo ""
+echo "If a GPU run OOMs on a MIG slice (jax preallocates ~75% of GPU memory by"
+echo "default, which doesn't leave much room on a 10GB slice once more than one"
+echo "circuit depth gets compiled in the same process), set:"
+echo "  XLA_PYTHON_CLIENT_PREALLOCATE=false"
+echo "before the python invocation. If that alone isn't enough, XLA_PYTHON_CLIENT_MEM_FRACTION"
+echo "can cap usage further."

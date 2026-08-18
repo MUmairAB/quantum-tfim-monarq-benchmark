@@ -1,5 +1,10 @@
-# Full L=20 deeper-layers rerun on the Compute Canada GPU allocation --
-# addresses the open finding in local_only/quantum_implementation_current_status.md.
+# Full L=20 deeper-layers rerun on Compute Canada -- addresses the open
+# finding in local_only/quantum_implementation_current_status.md.
+#
+# Filename kept as "vqe_gpu_*" for continuity with the already-run
+# n_layers=10 GPU data point, but this config runs on lightning.qubit (CPU,
+# C++ adjoint diff), not the GPU -- see configs/vqe_gpu_L20_timing_test.yaml
+# and src/vqe.py's module docstring for why.
 #
 # The original framing was "near-critical only" (h=0.95-1.2 at 6-7% error),
 # but the raw results/vqe_sim/20/*.json data shows h=0.4 (deep ferromagnetic
@@ -19,10 +24,11 @@
 # the L<=10 diagnostic (4/10 layers) that originally motivated n_layers=10 --
 # now checking where accuracy saturates at L=20 specifically.
 #
-# Run configs/vqe_gpu_L20_timing_test.yaml first -- confirms the GPU is
-# actually being used and gives a real per-point time estimate before
-# launching this (6 h-values x 4 layer counts = 24 points).
-method: vqe_gpu
+# Run configs/vqe_gpu_L20_timing_test.yaml first -- confirms no OOM at L=20
+# and gives a real per-point time estimate before launching this (6 h-values
+# x 4 layer counts = 24 points).
+method: vqe_lightning_adjoint
+device: lightning.qubit
 J: 1.0
 
 L_values: [20]
