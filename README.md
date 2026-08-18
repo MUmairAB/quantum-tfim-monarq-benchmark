@@ -16,16 +16,20 @@ All three methods build this same Hamiltonian and boundary condition through `sr
 ## 2. Sweep grid
 
 - `h/J` from 0 to 2, step 0.2 away from criticality and 0.05 within `[0.7, 1.3]`.
-- Simulation track (exact + NNQS, classical compute): `L ∈ {4, 6, 8, 10, 12, 16, 20, 24}`.
-- Hardware track (VQE on MonarQ): `L ∈ {2, 4, 6}`, capped by MonarQ's currently available qubits.
+- Simulation track (exact + NNQS, classical compute): `L ∈ {4, 6, 8, 10, 12, 16, 20, 24}`. VQE covers a 7-point subset of `h` up to `L=20` (see `notebooks/03_vqe.ipynb`).
+- Hardware track (VQE on real MonarQ hardware): `L=2` only, 1 circuit layer. `L ∈ {4, 6}` were tried on MonarQ's noise-model simulator first and found to be noise-dominated at any usable depth regardless of qubit count — see `notebooks/05_monarq_hardware.ipynb` for the full characterization.
 
 ## 3. Repo structure
 
 ```
 src/          hamiltonian.py, exact.py, nnqs.py, vqe.py — reusable library, run via CLI
-notebooks/    one notebook per method, imports from src/ and narrates the results
+notebooks/    one notebook per method (01-03), plus cross-method analysis (04)
+              and MonarQ hardware characterization (05)
 configs/      one YAML per sweep
-results/      {exact,nnqs,vqe_sim,vqe_hardware}/{L}/{h}.json
+results/      {exact,nnqs,vqe_sim}/{L}/{h}.json — simulation-track sweeps
+              vqe_gpu/{L}/{h}_layers{n}.json — VQE circuit-depth scan
+              monarq_sim/{L}/{h}_layers{n}.json — MonarQ noise-model characterization
+              vqe_hardware/{L}/{h}.json — real MonarQ hardware results
 figures/
 ```
 
@@ -37,7 +41,7 @@ source monarq-env/bin/activate
 pip install -r requirements.txt
 ```
 
-`quspin` needs OpenMP at the system level (`brew install libomp` on macOS). On Compute Canada, use `setup_computecanada.sh` instead of a plain `pip install` — see the script for why.
+`quspin` needs OpenMP at the system level (`brew install libomp` on macOS). On a Compute Canada / Digital Research Alliance cluster, use `setup_computecanada.sh` instead of a plain `pip install` — see the script for why.
 
 ## 5. Running a sweep
 
@@ -45,10 +49,15 @@ pip install -r requirements.txt
 python -m src.exact --config configs/exact_simulation_sweep.yaml
 python -m src.nnqs  --config configs/nnqs_simulation_sweep.yaml
 python -m src.vqe   --config configs/vqe_simulation_sweep.yaml
+python -m src.vqe   --config configs/vqe_gpu_L20_layer_scan.yaml --results-dir results/vqe_gpu
 ```
 
-Each run writes one JSON file per `(L, h)` point and skips points that already have a result, so an interrupted sweep can just be rerun.
+Each run writes one JSON file per `(L, h)` point and skips points that already have a result, so an interrupted sweep can just be rerun. The last command is the `L=20` circuit-depth scan, not a GPU run despite the filename — see `src/vqe.py`'s module docstring.
+
+MonarQ hardware runs (`src/vqe.py`'s `evaluate_on_device`) need real credentials and aren't a config-driven sweep — see `notebooks/05_monarq_hardware.ipynb` for the exact calls used.
 
 ## 6. Results
 
-`notebooks/01_exact_diagonalization.ipynb` and `notebooks/02_nnqs.ipynb` walk through the simulation-track results and produce the figures in `figures/`. NNQS matches exact diagonalization to well under 1% across the full `L` range, including at the critical point.
+- `notebooks/01_exact_diagonalization.ipynb`, `02_nnqs.ipynb`, `03_vqe.ipynb` — one method each. NNQS matches exact to well under 1% across the full range, including at the critical point. VQE matches at `L≤16` but degrades sharply at `L=20`; more circuit depth resolves most of that near the critical point, but only partially in the deep-ferromagnetic regime — two distinct failure mechanisms, detailed in `03_vqe.ipynb`.
+- `notebooks/04_analysis.ipynb` — all methods on shared figures, including the real hardware comparison at `L=2`.
+- `notebooks/05_monarq_hardware.ipynb` — why the hardware track stops at `L=2`: real MonarQ noise overwhelms this ansatz well before 10 circuit layers regardless of qubit count, readout error mitigation doesn't recover it, and real hardware performs measurably worse than the noise-model simulator predicts.
