@@ -1,0 +1,18 @@
+{
+  "L": 20,
+  "h": 1.0,
+  "J": 1.0,
+  "E0": -23.499164414646522,
+  "E0_exact": -25.107797111623853,
+  "rel_error": 0.06406904953969864,
+  "method": "vqe_gpu",
+  "device": "default.qubit",
+  "jax_backend": "gpu",
+  "boundary": "open",
+  "two_qubit_gate_count": 190,
+  "wall_time_s": 292.9970755309996,
+  "n_steps": 600,
+  "stepsize": 0.1,
+  "seed": 0,
+  "n_layers": 10
+}
