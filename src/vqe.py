@@ -12,6 +12,15 @@ with circuit depth and OOMs at L=20 with enough layers; lightning.qubit's
 adjoint is natively C++ and keeps memory ~O(2^L) regardless of depth, at
 backprop-comparable speed. The device name is config-driven (`device` key in
 run_sweep) in case a GPU adjoint device is worth trying later.
+
+`evaluate_on_device` is the MonarQ hardware entry point. Training itself
+never runs on hardware — parameter-shift gradients would need thousands of
+real circuit evaluations per VQE run, which isn't practical against a
+shot-limited, queued device. Instead, params come from a normal `train_vqe`
+simulation run, and `evaluate_on_device` executes that fixed, already-trained
+circuit once (with shots) on `monarq.sim` or the real `monarq.default`
+backend, to measure how much hardware noise degrades an already-good
+solution.
 """
 from __future__ import annotations
 
@@ -38,11 +47,17 @@ def hva_layer(gamma: float, beta: float, L: int) -> None:
         qml.RX(beta, wires=w)
 
 
-def build_circuit(L: int, H, dev):
-    """Build the HVA QNode: a Hadamard layer, then n_layers of hva_layer."""
+def build_circuit(L: int, H, dev, interface: str | None = "jax", diff_method: str | None = "adjoint", shots=None):
+    """Build the HVA QNode: a Hadamard layer, then n_layers of hva_layer.
+
+    Defaults match the simulator training path (`train_vqe`). The hardware
+    path (`evaluate_on_device`) overrides all three: no interface/diff_method
+    needed since it only evaluates a fixed circuit, and `shots` is required
+    on any real or noisy-sampled device.
+    """
     import pennylane as qml
 
-    @qml.qnode(dev, interface="jax", diff_method="adjoint")
+    @qml.qnode(dev, interface=interface, diff_method=diff_method, shots=shots)
     def circuit(params):
         for w in range(L):
             qml.Hadamard(wires=w)
@@ -62,11 +77,15 @@ def train_vqe(
     stepsize: float = 0.1,
     seed: int | None = None,
     device: str = "lightning.qubit",
-) -> tuple[float, int]:
+    return_params: bool = False,
+):
     """Train the HVA and return (energy, two_qubit_gate_count).
 
     two_qubit_gate_count = (L-1) * n_layers, the IsingZZ gate count — the
-    quantity that gates hardware feasibility on MonarQ.
+    quantity that gates hardware feasibility on MonarQ. With
+    return_params=True, also returns the trained params (needed to hand a
+    fixed, already-optimized circuit to evaluate_on_device for a hardware
+    run) as a third element.
     """
     import jax
 
@@ -103,7 +122,60 @@ def train_vqe(
 
     final_energy = float(circuit(params))
     two_qubit_gate_count = (L - 1) * n_layers
+    if return_params:
+        return final_energy, two_qubit_gate_count, params
     return final_energy, two_qubit_gate_count
+
+
+def evaluate_on_device(
+    L: int,
+    h: float,
+    params,
+    J: float = 1.0,
+    device: str = "monarq.sim",
+    shots: int = 1000,
+    client=None,
+) -> float:
+    """Run an already-trained HVA circuit once on `device` and return the measured energy.
+
+    `params` should come from `train_vqe` (a plain array of shape
+    (n_layers, 2)) — this function does no training, just one circuit
+    execution per Hamiltonian term with the given shot count. `client` is a
+    `MonarqClient` instance, required for the real `monarq.default` backend
+    and unused for `monarq.sim`. Credentials are the caller's responsibility
+    (see `local_only/access_monarq.py`) — this module stays credential-free
+    since it's the part of the repo that's pushed to GitHub.
+
+    Measures each Hamiltonian term separately and sums the weighted results
+    in plain Python, rather than a single qml.expval(H) call: confirmed by
+    direct test that monarq.sim's multi-term Hamiltonian expval returns
+    near-zero nonsense (a state with known expval -1.0 came back as -0.005),
+    while single-term expval values are correct. Per-term measurement works
+    around it and costs one extra circuit execution per term either way.
+
+    params gets converted to plain floats before use — passing the JAX
+    arrays train_vqe returns straight through measurably degraded results
+    on monarq.sim relative to the same circuit with plain-float angles,
+    consistent with the plugin's API layer not handling JAX's array type
+    correctly when serializing gate parameters.
+    """
+    import numpy as np
+    import pennylane as qml
+
+    params = np.asarray(params, dtype=float)
+
+    device_kwargs = {"wires": L}
+    if client is not None:
+        device_kwargs["client"] = client
+    dev = qml.device(device, **device_kwargs)
+
+    H = build_pennylane_hamiltonian(L, h, J)
+    coeffs, ops = H.terms()
+    total = 0.0
+    for coeff, op in zip(coeffs, ops):
+        circuit = build_circuit(L, op, dev, interface=None, diff_method=None, shots=shots)
+        total += coeff * circuit(params)
+    return float(total)
 
 
 def run_sweep(config: dict, results_dir: Path, exact_dir: Path) -> None:

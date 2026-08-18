@@ -8,6 +8,7 @@ PyYAML==6.0.3
 # qiskit 2.5.0 — newest version with a Compute Canada wheel.
 qiskit==2.5.0
 qiskit-calculquebec @ git+https://github.com/calculquebec/qiskit-calculquebec.git@d21bbb75997b70f9ba269b05f4707aa7173d07a5
+python-dotenv==1.2.3
 
 # MonarQ connectivity (PennyLane path) + VQE
 pennylane==0.45.1
