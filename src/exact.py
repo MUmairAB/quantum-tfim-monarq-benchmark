@@ -1,6 +1,6 @@
-"""Exact ground-state energy of the open-BC TFIM via QuSpin (Phase 1, step 1).
+"""Exact ground-state energy of the open-BC TFIM via QuSpin.
 
-This is the ground-truth method that NNQS and VQE are checked against. Usage:
+Ground truth that NNQS and VQE are checked against. Usage:
 
     python -m src.exact --config configs/<sweep>.yaml
 """
@@ -26,16 +26,9 @@ def ground_state_energy(L: int, h: float, J: float = 1.0, basis=None) -> float:
 
 
 def run_sweep(config: dict, results_dir: Path) -> None:
-    """Run the full L x h sweep from a config dict and write one JSON file per point.
-
-    The QuSpin basis only depends on L, so it's built once per L and reused
-    across every h in the sweep rather than rebuilt from scratch each time —
-    at L=24 that basis build alone costs ~20s per point, so this matters.
-
-    Resumable: a point whose output file already exists is skipped, so an
-    interrupted run (crash, sleep, Ctrl-C) only costs the interrupted point,
-    not the whole sweep — just rerun the same command.
-    """
+    """Run the full L x h sweep from a config dict, writing one JSON file per
+    point. Resumable: points that already have an output file are skipped,
+    so a crashed or interrupted run can just be rerun."""
     J = config.get("J", 1.0)
     h_grid = build_h_grid(**config.get("h_grid", {}))
     L_values = config["L_values"]

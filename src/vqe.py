@@ -1,37 +1,17 @@
 """VQE (Hamiltonian Variational Ansatz) ground-state energy for the open-BC TFIM.
 
-Phase 1, step 3: a first working VQE, simulator only, checked against the
-exact-diagonalization results from src/exact.py. Real MonarQ hardware is
-Phase 3, not this module — confirm before pointing this at anything but a
-local simulator device.
-
-Training runs through JAX (jit-compiled, optax Adam) rather than PennyLane's
-own autograd-based optimizer, on lightning.qubit (PennyLane's C++ backend)
-with diff_method="adjoint" rather than default.qubit's default backprop.
-This combination was arrived at after two things that didn't work for the
-L=20 deeper-layer scan this module was built to run:
-
-  - default.qubit + backprop: backprop keeps the full statevector after
-    every gate for the backward pass, so memory scales with n_layers. At
-    L=20/16 layers this needed ~10GB in one allocation and OOM'd a Compute
-    Canada GPU's 10GB MIG slice.
-  - default.qubit + adjoint (which fixes the memory scaling): correct, but
-    6-44x slower than backprop in local testing, growing worse with L —
-    default.qubit's adjoint isn't well jit-compiled under JAX and appears
-    to fall back to a non-XLA-compiled path per step.
-
-lightning.qubit's adjoint is natively C++, not a JAX-interfaced Python
-fallback: it matched backprop's speed exactly in testing (down to matching
-default.qubit+backprop's wall-clock at L=6/12/16) while keeping memory
-~O(2^L) regardless of depth, same as any adjoint method. It's CPU-only, not
-GPU — but since it already matches the speed we'd measured on Compute
-Canada's GPU while sidestepping the memory ceiling entirely, and needs no
-new dependency (pennylane-lightning ships as part of a plain `pennylane`
-install), it's the simulator this module actually uses now. The device name
-is still config-driven (see run_sweep's `device` key) in case a GPU-native
-adjoint device (e.g. lightning.gpu) is worth revisiting later. Usage:
+Simulator only — real MonarQ hardware runs are a separate step, confirm
+before pointing this at anything but a local simulator device. Usage:
 
     python -m src.vqe --config configs/<sweep>.yaml
+
+Training runs through JAX (jit-compiled, optax Adam) on lightning.qubit with
+diff_method="adjoint", rather than default.qubit's default backprop.
+default.qubit+backprop keeps a full statevector per layer, so memory scales
+with circuit depth and OOMs at L=20 with enough layers; lightning.qubit's
+adjoint is natively C++ and keeps memory ~O(2^L) regardless of depth, at
+backprop-comparable speed. The device name is config-driven (`device` key in
+run_sweep) in case a GPU adjoint device is worth trying later.
 """
 from __future__ import annotations
 
@@ -59,13 +39,7 @@ def hva_layer(gamma: float, beta: float, L: int) -> None:
 
 
 def build_circuit(L: int, H, dev):
-    """Build the HVA QNode: Hadamard layer (uniform superposition) then n_layers of hva_layer.
-
-    interface="jax" so the QNode's parameters, execution, and gradients all
-    run through JAX. diff_method="adjoint" keeps memory ~O(2^L) regardless
-    of circuit depth — see the module docstring for why this needs to be
-    paired with lightning.qubit specifically, not just any device.
-    """
+    """Build the HVA QNode: a Hadamard layer, then n_layers of hva_layer."""
     import pennylane as qml
 
     @qml.qnode(dev, interface="jax", diff_method="adjoint")
@@ -89,18 +63,15 @@ def train_vqe(
     seed: int | None = None,
     device: str = "lightning.qubit",
 ) -> tuple[float, int]:
-    """Train the HVA (JAX, jit-compiled, adjoint diff) and return (energy, two_qubit_gate_count).
+    """Train the HVA and return (energy, two_qubit_gate_count).
 
-    two_qubit_gate_count is (L-1) * n_layers — the IsingZZ gates. This is the
-    quantity that actually gates hardware feasibility on MonarQ (Phase 3), so
-    it's returned here even though it doesn't matter for simulator runs.
+    two_qubit_gate_count = (L-1) * n_layers, the IsingZZ gate count — the
+    quantity that gates hardware feasibility on MonarQ.
     """
     import jax
 
-    # JAX defaults to float32/complex64, silently truncating precision below
-    # what the rest of the repo uses (QuSpin, NetKet, and the old autograd
-    # VQE are all float64) — enable x64 explicitly so switching backends
-    # doesn't also switch precision.
+    # x64 isn't JAX's default; enable it explicitly to match the rest of
+    # the repo's float64 precision (QuSpin, NetKet).
     jax.config.update("jax_enable_x64", True)
     import jax.numpy as jnp
     import numpy as np
@@ -111,18 +82,12 @@ def train_vqe(
     H = build_pennylane_hamiltonian(L, h, J)
     circuit = build_circuit(L, H, dev)
 
-    # Params are initialized with plain numpy (not jax.random) so a given
-    # seed produces the exact same starting point as the old autograd-based
-    # implementation — isolates "more layers" as the only thing changing
-    # relative to earlier vqe_sim results.
     rng = np.random.default_rng(seed)
     params = jnp.array(rng.uniform(0, 2 * np.pi, size=(n_layers, 2)))
 
-    # b1/b2/eps match qml.AdamOptimizer's defaults (beta1=0.9, beta2=0.99,
-    # eps=1e-8) exactly — optax.adam's own default beta2 is 0.999, and that
-    # mismatch alone was enough to send this non-convex landscape to a
-    # different local minimum at L=12 during testing. Matching them keeps
-    # "more layers" the only real variable relative to the old vqe_sim results.
+    # b1/b2/eps match qml.AdamOptimizer's defaults rather than optax's own
+    # (beta2=0.99 vs optax's 0.999) — the mismatch changes which local
+    # minimum training converges to.
     opt = optax.adam(stepsize, b1=0.9, b2=0.99, eps=1e-8)
     opt_state = opt.init(params)
 
@@ -142,22 +107,12 @@ def train_vqe(
 
 
 def run_sweep(config: dict, results_dir: Path, exact_dir: Path) -> None:
-    """Train the HVA VQE at every (L, h, n_layers) point in the config and save results + exact comparison.
+    """Train the HVA VQE at every (L, h, n_layers) point in the config and
+    save results alongside the matching exact-diagonalization comparison.
 
-    h-values come from an explicit `h_values` list (small validation sweeps)
-    or a `h_grid` spec (build_h_grid kwargs, for matching the full exact sweep).
-    `train.n_layers` can be a single value (as in the original sim sweep) or
-    a list, to scan circuit depth at fixed L/h — used for the L=20 GPU rerun
-    that checks whether more layers resolves the accuracy degradation found
-    at 10 layers. Output filenames only carry a `_layersN` suffix when a scan
-    is actually configured (len > 1), so the original single-depth sweep's
-    file naming (and its resumability against already-existing results) is
-    unaffected.
-
-    Resumable: a point whose output file already exists is skipped, so an
-    interrupted run (crash, sleep, Ctrl-C) only costs the interrupted point,
-    not the whole sweep — just rerun the same command. This matters most for
-    this module: the L=20 leg alone takes on the order of 10 hours per depth.
+    `train.n_layers` can be a single value or a list, to scan circuit depth
+    at fixed L/h; output filenames only get a `_layersN` suffix when scanning.
+    Resumable: points that already have an output file are skipped.
     """
     import jax
 
@@ -175,10 +130,6 @@ def run_sweep(config: dict, results_dir: Path, exact_dir: Path) -> None:
         n_layers_values = [n_layers_values]
     scanning_layers = len(n_layers_values) > 1
 
-    # jax.default_backend() reflects JAX's own array ops (the optimizer/glue
-    # code), not what ran the circuit simulation itself — that's whatever
-    # `device` (below, in each result record) says. lightning.qubit always
-    # simulates in C++ on CPU regardless of what JAX itself defaults to.
     print(f"JAX backend: {jax.default_backend()}  devices: {jax.devices()}")
 
     for L in L_values:

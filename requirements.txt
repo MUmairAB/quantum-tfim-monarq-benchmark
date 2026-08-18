@@ -1,39 +1,28 @@
 # Top-level dependencies; pip resolves the rest. Tested on macOS/CPU.
-# numpy pinned to 2.4.2, not the newer 2.5.2, to match the newest version
-# available in Compute Canada's constrained wheelhouse (numpy/scipy/mpi4py/
-# pandas/h5py/Cython/grpcio are locked there for binary compatibility with
-# their optimized builds) — keeps both environments on the same version.
+# numpy pinned to match Compute Canada's wheelhouse.
 numpy==2.4.2
 matplotlib==3.11.1
 PyYAML==6.0.3
 
 # MonarQ connectivity (Qiskit path)
-# qiskit 2.5.0, not 2.5.2 — newest version with a Compute Canada wheel.
+# qiskit 2.5.0 — newest version with a Compute Canada wheel.
 qiskit==2.5.0
 qiskit-calculquebec @ git+https://github.com/calculquebec/qiskit-calculquebec.git@d21bbb75997b70f9ba269b05f4707aa7173d07a5
 
 # MonarQ connectivity (PennyLane path) + VQE
 pennylane==0.45.1
 pennylane-calculquebec==0.8.2
-# VQE training loop (src/vqe.py) is JAX/optax-based, running the actual
-# circuit simulation on lightning.qubit with adjoint differentiation (fast,
-# and memory-efficient regardless of circuit depth — see src/vqe.py's module
-# docstring for why default.qubit isn't used here). pennylane-lightning ships
-# as part of a plain `pennylane` install, but pinned explicitly since it's a
-# direct dependency now, not just incidental.
+# VQE (src/vqe.py) runs on lightning.qubit with adjoint differentiation.
 optax==0.2.8
 pennylane-lightning==0.45.0
 
 # NNQS
 netket==3.22.3
-# jax 0.10.2, not 0.11.0 — 0.11.0 requires Python >=3.12, Compute Canada runs 3.11.
+# jax 0.10.2 — 0.11.0 needs Python >=3.12, Compute Canada runs 3.11.
 jax==0.10.2
-# On a GPU machine, install jax[cuda12] instead of plain jax to get GPU
-# support for NNQS training. VQE (src/vqe.py) doesn't benefit from this —
-# it runs on lightning.qubit (CPU) regardless, see above.
+# On a GPU machine, install jax[cuda12] instead for GPU-accelerated NNQS training.
 
 # Exact diagonalization (needs OpenMP at the system level — on macOS: brew install libomp)
-# On Compute Canada, this alone isn't enough — see setup_computecanada.sh.
 quspin==1.0.1
 
 # Notebooks

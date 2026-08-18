@@ -1,7 +1,6 @@
 """Neural-network quantum state (RBM) ground-state energy for the open-BC TFIM.
 
-Phase 1, step 2: a first working NNQS, checked against the exact-diagonalization
-results from src/exact.py at a handful of (L, h) points. Usage:
+Checked against the exact-diagonalization results from src/exact.py. Usage:
 
     python -m src.nnqs --config configs/<sweep>.yaml
 """
@@ -32,10 +31,8 @@ def train_nnqs(
 ) -> tuple[float, float]:
     """Train an RBM ground state via VMC and return (energy_mean, energy_error).
 
-    energy_error is the Monte Carlo standard error on the mean, not a bound on
-    the distance to the true ground state — the RBM's own expressiveness and
-    optimizer convergence separately limit accuracy, which is exactly what
-    this Phase 1 step is checking against the exact results.
+    energy_error is the Monte Carlo standard error on the mean, not a bound
+    on distance to the true ground state.
     """
     import netket as nk
 
@@ -64,14 +61,12 @@ def load_exact_E0(L: int, h: float, exact_dir: Path) -> float | None:
 
 
 def run_sweep(config: dict, results_dir: Path, exact_dir: Path) -> None:
-    """Train an RBM at every (L, h) point in the config and save results + exact comparison.
+    """Train an RBM at every (L, h) point in the config and save results
+    alongside the matching exact-diagonalization comparison.
 
-    h-values come from an explicit `h_values` list (small validation sweeps)
-    or a `h_grid` spec (build_h_grid kwargs, for matching the full exact sweep).
-
-    Resumable: a point whose output file already exists is skipped, so an
-    interrupted run (crash, sleep, Ctrl-C) only costs the interrupted point,
-    not the whole sweep — just rerun the same command.
+    h-values come from an explicit `h_values` list or a `h_grid` spec
+    (build_h_grid kwargs). Resumable: points that already have an output
+    file are skipped.
     """
     J = config.get("J", 1.0)
     L_values = config["L_values"]

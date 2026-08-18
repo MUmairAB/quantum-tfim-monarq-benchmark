@@ -1,28 +1,8 @@
-# Timing/correctness check for the lightning.qubit + adjoint VQE, to run
-# first before committing to the full layer scan in
-# configs/vqe_gpu_L20_layer_scan.yaml.
-#
-# Filename kept as "vqe_gpu_*" even though this no longer uses the GPU: two
-# things were tried and ruled out first (both on Compute Canada's GPU
-# allocation) -- default.qubit+backprop OOM'd a 10GB MIG slice at L=20/16
-# layers (backprop's memory scales with circuit depth), and default.qubit+
-# adjoint fixed the memory but was 6-44x slower locally, growing worse with
-# L, because default.qubit's adjoint isn't well jit-compiled under JAX.
-# lightning.qubit's natively-C++ adjoint fixed both: matched backprop's
-# speed exactly in local testing up to L=16, while keeping memory ~O(2^L)
-# regardless of depth (verified locally up to 30 layers with no issue). It's
-# CPU-only, not GPU -- see src/vqe.py's module docstring for the full story.
-#
-# What to check in the output:
-#   1. No OOM at L=20 specifically -- only tested locally up to L=16.
-#   2. Per-point wall-clock time at n_layers=30, to estimate the full scan's
-#      total cost (6 h-values x 4 layer counts = 24 points) before launching it.
-#
-# Single h-value (h=1.0, the critical point) across n_layers = [10, 16, 20,
-# 24, 30]. n_layers=10 already has a real data point at results/vqe_gpu/20/
-# 1.000_layers10.json from the (now-abandoned) default.qubit+backprop GPU
-# run -- not re-included here since that comparison's already been made
-# (293s on GPU vs 4020s old-CPU, 6.41% error vs old CPU's 6.44% -- consistent).
+# Timing/correctness check before the full layer scan in
+# vqe_gpu_L20_layer_scan.yaml: confirms no OOM at L=20 and gives a
+# per-point time estimate. Single h-value (critical point) across a range
+# of layer counts. Filename kept as "vqe_gpu_*" for continuity, though this
+# runs on lightning.qubit (CPU) — see src/vqe.py.
 method: vqe_lightning_adjoint
 device: lightning.qubit
 J: 1.0

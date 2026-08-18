@@ -1,8 +1,7 @@
-"""Shared TFIM convention: H = -J * sum_i Z_i Z_{i+1} - h * sum_i X_i, open BC.
+"""Builds the open-BC TFIM Hamiltonian: H = -J * sum_i Z_i Z_{i+1} - h * sum_i X_i.
 
-See README.md for the locked convention. Every method (exact, NNQS, VQE) must
-build its Hamiltonian through this module so the three-way comparison can't
-silently drift onto three different models.
+Every method (exact, NNQS, VQE) builds its Hamiltonian through this module,
+so the three-way comparison stays on the same model.
 """
 from __future__ import annotations
 
@@ -10,11 +9,8 @@ import numpy as np
 
 
 def build_quspin_basis(L: int):
-    """Build the QuSpin spin-1/2 basis for a chain of length L (no symmetry reduction).
-
-    This only depends on L, not on h or J, so callers sweeping over h for a
-    fixed L should build it once and reuse it across the whole sweep.
-    """
+    """QuSpin spin-1/2 basis for a chain of length L. Depends only on L, so
+    reuse across an h-sweep instead of rebuilding per point."""
     from quspin.basis import spin_basis_1d
 
     return spin_basis_1d(L, pauli=True)
@@ -29,17 +25,11 @@ def build_quspin_hamiltonian(
     check_symm: bool = False,
     check_pcon: bool = False,
 ):
-    """Build the open-BC TFIM Hamiltonian as a QuSpin operator for QuSpin's eigsh.
+    """Open-BC TFIM as a QuSpin operator, ready for `eigsh`.
 
-    Pass in a `basis` (from build_quspin_basis) to reuse it across an h-sweep
-    instead of rebuilding it for every point — at L=24 that basis build alone
-    costs ~20s, so reusing it matters for sweep wall-clock time.
-
-    QuSpin's Hermiticity/symmetry checks are off by default here: they were
-    verified to change nothing about the resulting ground-state energy but
-    roughly triple the per-point cost at L=24 (confirmed against the roadmap's
-    own reference value, L=6 h=1.0 -> E0=-7.29622981, both with checks on and off).
-    Pass check_herm/check_symm/check_pcon=True to re-enable them if debugging.
+    Hermiticity/symmetry checks are off by default — they don't change the
+    ground-state energy but roughly triple the cost at large L. Pass
+    check_herm/check_symm/check_pcon=True to re-enable for debugging.
     """
     from quspin.operators import hamiltonian
 
@@ -59,11 +49,8 @@ def build_quspin_hamiltonian(
 
 
 def build_netket_hamiltonian(L: int, h: float, J: float = 1.0):
-    """Build the open-BC TFIM as a NetKet operator, for NNQS training (Phase 1/2).
-
-    Returns (hilbert_space, hamiltonian_operator) since NetKet's variational
-    state needs the Hilbert space object alongside the operator itself.
-    """
+    """Open-BC TFIM as a NetKet operator, for NNQS training. Returns
+    (hilbert_space, hamiltonian_operator)."""
     import netket as nk
 
     g = nk.graph.Chain(L, pbc=False)
@@ -77,12 +64,8 @@ def build_netket_hamiltonian(L: int, h: float, J: float = 1.0):
 
 
 def build_pennylane_hamiltonian(L: int, h: float, J: float = 1.0):
-    """Build the open-BC TFIM as a PennyLane Hamiltonian, for VQE (Phase 1/3).
-
-    Used both for the simulator-only VQE in Phase 1 and, later, for real
-    MonarQ hardware runs in Phase 3 — the Hamiltonian itself never changes
-    between those two; only the device the circuit runs on does.
-    """
+    """Open-BC TFIM as a PennyLane Hamiltonian, for the VQE circuit (simulator
+    and MonarQ hardware both use this — only the device differs)."""
     import pennylane as qml
 
     coeffs, ops = [], []
@@ -104,12 +87,8 @@ def build_h_grid(
     fine_step: float = 0.05,
     ndigits: int = 6,
 ) -> list[float]:
-    """Build the sweep grid: coarse step away from criticality, fine step near it.
-
-    Matches README.md's locked sweep grid: coarse_step outside [fine_lo, fine_hi],
-    fine_step inside it (since the physics changes fastest near the critical
-    point h_c, that's where extra resolution actually earns its keep).
-    """
+    """Sweep grid over h: coarse step away from the critical point, fine step
+    near it (h in [fine_lo, fine_hi])."""
     coarse = np.arange(h_min, h_max + coarse_step / 2, coarse_step)
     fine = np.arange(fine_lo, fine_hi + fine_step / 2, fine_step)
     coarse_outside = coarse[(coarse < fine_lo) | (coarse > fine_hi)]

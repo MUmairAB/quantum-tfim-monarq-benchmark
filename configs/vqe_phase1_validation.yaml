@@ -1,13 +1,8 @@
-# Phase 1 step 3: VQE (HVA, simulator only) validation against exact diagonalization.
-# Same L_values/h_values as configs/nnqs_phase1_validation.yaml for a direct
-# three-way comparison at identical points.
-#
-# n_layers=10 was chosen empirically: at 4 layers, error reached 10.9% in the
-# ferromagnetic regime (h=0.4) — a genuine ansatz-expressiveness limit (the
-# true ground state there is GHZ-like and needs real circuit depth for a local
-# ansatz to reach), not an optimization bug. 10 layers brings all tested points
-# to 0.03-0.37% error, within the roadmap's 0.1-1% tolerance, and 90 two-qubit
-# gates at L=10 stays well under MonarQ's ~115-gate depth budget (Phase 3).
+# VQE (HVA, simulator only) validation against exact diagonalization.
+# Same L_values/h_values as nnqs_phase1_validation.yaml for a direct
+# three-way comparison. n_layers=10 chosen empirically — 4 layers wasn't
+# enough in the ferromagnetic regime (h=0.4), a circuit-depth limit rather
+# than an optimization bug.
 J: 1.0
 
 L_values: [4, 6, 8, 10]

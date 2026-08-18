@@ -1,18 +1,6 @@
-# VQE (HVA, simulator only) full-L sweep, capped at L=20 rather than the
-# full L=24 simulation-track ceiling used by exact/NNQS.
-#
-# Why the cap differs from exact/NNQS: default.qubit is a statevector
-# simulator, so cost scales with the full 2^L state (like exact
-# diagonalization), not just RBM parameter count (like NNQS). Measured
-# directly on this machine: L=20 costs ~8.65s/optimizer-step (~86 min for
-# a full 600-step run), and L=24 gets OOM-killed before finishing a single
-# step. So L=24 is excluded entirely, and L=20 is included at real cost
-# (~10 hours for this sweep's 7 h-values alone, ~92% of this file's total
-# runtime) — see notebooks/03_vqe.ipynb for the reasoning and figures.
-#
-# h_values intentionally kept to the same 7-point Phase 1 validation subset
-# (not the full 21-point exact/NNQS grid) to keep the L=20 cost from
-# tripling further.
+# VQE (HVA, simulator only) full-L sweep, capped at L=20 — the statevector
+# simulator scales with 2^L and L=24 OOMs. h_values kept to the 7-point
+# validation subset rather than the full grid to keep L=20 cost manageable.
 J: 1.0
 
 L_values: [4, 6, 8, 10, 12, 16, 20]

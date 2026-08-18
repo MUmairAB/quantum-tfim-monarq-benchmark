@@ -1,5 +1,4 @@
-# Exact-diagonalization sweep, simulation track (README.md "Sweep grid").
-# Boundary conditions: open (fixed in src/hamiltonian.py).
+# Exact-diagonalization sweep, simulation track.
 J: 1.0
 
 L_values: [4, 6, 8, 10, 12, 16, 20, 24]

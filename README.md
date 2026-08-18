@@ -1,53 +1,54 @@
-# TFIM: NNQS vs. VQE vs. exact
+# TFIM: NNQS vs. VQE vs. exact diagonalization
 
-Three-way comparison of neural-network quantum states (NNQS), variational quantum
-eigensolver (VQE) on MonarQ, and exact diagonalization for the transverse-field
-Ising model (TFIM). See [quantum_implementation_roadmap.md](quantum_implementation_roadmap.md)
-for the full phased plan; this README holds the conventions that every method
-(exact, NNQS, VQE) must agree on.
+A three-way comparison of methods for finding ground-state energies of the transverse-field Ising model (TFIM): exact diagonalization, neural-network quantum states (NNQS), and a variational quantum eigensolver (VQE) running on MonarQ, Calcul Québec's superconducting-qubit backend.
 
-## Hamiltonian convention
+## 1. Model
 
 ```
 H = -J * sum_i Z_i Z_{i+1}  -  h * sum_i X_i
 ```
 
-- `J = 1` (fixed).
-- Critical point at `h_c = J = 1`.
-- **Boundary conditions: open** (no wraparound `Z_{L-1} Z_0` term). Chosen because
-  it maps cleanly onto hardware connectivity with no extra SWAPs, and avoids the
-  periodic case's fermion-parity-sector subtlety in the analytic solution.
+- `J = 1` (fixed), critical point at `h_c = 1`.
+- Open boundary conditions (no `Z_{L-1} Z_0` wraparound term) — this maps directly onto hardware connectivity without extra SWAP gates.
 
-Every method — QuSpin exact diagonalization, NetKet NNQS, and the PennyLane HVA
-VQE (simulator and MonarQ hardware) — must use exactly this Hamiltonian and
-boundary condition. Any deviation makes the "three-way comparison" silently
-compare three different models.
+All three methods build this same Hamiltonian and boundary condition through `src/hamiltonian.py`, so the comparison stays apples-to-apples.
 
-## Sweep grid
+## 2. Sweep grid
 
-- `h/J` range: 0 to 2.
-  - Coarse step 0.2 away from criticality.
-  - Fine step 0.05 within `h ∈ [0.7, 1.3]` (near `h_c`).
-- **System sizes — simulation track:** `L ∈ {4, 6, 8, 10, 12, 16, 20, 24}`
-  (NNQS + exact diagonalization; classical compute only, unaffected by hardware
-  limits).
-- **System sizes — hardware ladder:** `L ∈ {2, 4, 6}`, capped by the 6 qubits
-  currently available on MonarQ (confirmed via program demo + benchmark pull:
-  qubits 9–14, couplers 15–19 real, everything else zero). Re-check this
-  right before submitting the Phase 3 batch — the *count* is settled, but which
-  physical qubits carry the calibration can drift.
+- `h/J` from 0 to 2, step 0.2 away from criticality and 0.05 within `[0.7, 1.3]`.
+- Simulation track (exact + NNQS, classical compute): `L ∈ {4, 6, 8, 10, 12, 16, 20, 24}`.
+- Hardware track (VQE on MonarQ): `L ∈ {2, 4, 6}`, capped by MonarQ's currently available qubits.
 
-## Scope decisions (locked)
-
-- Mixed-field extension: parked. Optional stretch goal only if the core
-  comparison finishes early — not a build target.
-
-## Repo layout
+## 3. Repo structure
 
 ```
-src/          # hamiltonian.py, nnqs.py, vqe.py, exact.py — reusable library, CLI-driven
-notebooks/    # one notebook per phase/method: imports from src/, runs it, narrates in markdown
-configs/      # one yaml per sweep (L, h, method as parameters — config-driven, not hardcoded)
-results/{exact,nnqs,vqe_sim,vqe_hardware}/{L}/{h}.json
+src/          hamiltonian.py, exact.py, nnqs.py, vqe.py — reusable library, run via CLI
+notebooks/    one notebook per method, imports from src/ and narrates the results
+configs/      one YAML per sweep
+results/      {exact,nnqs,vqe_sim,vqe_hardware}/{L}/{h}.json
 figures/
 ```
+
+## 4. Setup
+
+```bash
+python3.11 -m venv monarq-env
+source monarq-env/bin/activate
+pip install -r requirements.txt
+```
+
+`quspin` needs OpenMP at the system level (`brew install libomp` on macOS). On Compute Canada, use `setup_computecanada.sh` instead of a plain `pip install` — see the script for why.
+
+## 5. Running a sweep
+
+```bash
+python -m src.exact --config configs/exact_simulation_sweep.yaml
+python -m src.nnqs  --config configs/nnqs_simulation_sweep.yaml
+python -m src.vqe   --config configs/vqe_simulation_sweep.yaml
+```
+
+Each run writes one JSON file per `(L, h)` point and skips points that already have a result, so an interrupted sweep can just be rerun.
+
+## 6. Results
+
+`notebooks/01_exact_diagonalization.ipynb` and `notebooks/02_nnqs.ipynb` walk through the simulation-track results and produce the figures in `figures/`. NNQS matches exact diagonalization to well under 1% across the full `L` range, including at the critical point.

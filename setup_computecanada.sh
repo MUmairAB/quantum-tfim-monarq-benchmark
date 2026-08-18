@@ -2,25 +2,12 @@
 # Environment setup for Compute Canada / Digital Research Alliance clusters.
 # Run from the repo root: bash setup_computecanada.sh [venv_dir]
 #
-# Two things about their shared JupyterLab kernel environment are not
-# obvious from the errors alone:
-#
-# 1. PIP_PREFIX and EBPYTHONPREFIXES/EBPYTHONPREFIXES_PRIORITY are set
-#    globally in the kernel's environment. PIP_PREFIX silently redirects
-#    every pip install to a scratch location instead of the active venv,
-#    and EBPYTHONPREFIXES injects the shared kernel's site-packages into
-#    sys.path ahead of the venv's own — so packages appear to "install"
-#    successfully but the venv's Python never sees them, or sees the
-#    wrong (older) version. Unsetting these gives a genuinely isolated venv.
-#
-# 2. quspin's compiled dependencies (quspin-extensions, parallel-sparse-tools)
-#    have no prebuilt wheel on PyPI for this platform, so a plain
-#    `pip install -r requirements.txt` falls back to a source build that
-#    silently fails to compile the C++ extensions (the package "installs"
-#    but importing it fails deep inside quspin's own import chain).
-#    Compute Canada's wheelhouse has working prebuilt wheels for both —
-#    older than the versions PyPI would otherwise select, but functionally
-#    correct — so we force pip to use those specifically after the main install.
+# Their shared JupyterLab kernel sets PIP_PREFIX and EBPYTHONPREFIXES
+# globally, which silently redirects pip installs away from the venv and
+# leaks the shared kernel's site-packages ahead of it. quspin's compiled
+# dependencies also have no working PyPI wheel here, so a plain
+# `pip install -r requirements.txt` produces a package that "installs" but
+# fails to import — Compute Canada's own wheelhouse has working builds.
 set -e
 
 unset PIP_PREFIX
@@ -32,13 +19,8 @@ VENV_DIR="${1:-$HOME/quantum-tfim-env}"
 python3 -m venv "$VENV_DIR"
 "$VENV_DIR/bin/pip" install --index-url https://pypi.org/simple/ -r requirements.txt
 
-# requirements.txt pins plain (CPU) jax for portability. On a GPU allocation,
-# swap in the CUDA build so NNQS training actually uses the GPU instead of
-# silently falling back to CPU. (VQE — src/vqe.py — runs on lightning.qubit
-# regardless of this; it doesn't benefit from GPU jax, see requirements.txt's
-# comment there for why.) jax isn't one of the packages Compute Canada's
-# wheelhouse restricts (see the file header), so the normal PyPI index works
-# here too.
+# On a GPU allocation, swap in the CUDA build of jax so NNQS training uses
+# the GPU (VQE runs on lightning.qubit regardless and doesn't benefit).
 if command -v nvidia-smi &>/dev/null; then
     echo "GPU detected — installing jax[cuda12] in place of plain jax..."
     "$VENV_DIR/bin/pip" install --index-url https://pypi.org/simple/ --force-reinstall "jax[cuda12]==0.10.2"
