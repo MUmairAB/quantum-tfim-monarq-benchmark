@@ -17,18 +17,24 @@ All three methods build this same Hamiltonian and boundary condition through `sr
 
 - `h/J` from 0 to 2, step 0.2 away from criticality and 0.05 within `[0.7, 1.3]`.
 - Simulation track (exact + NNQS, classical compute): `L ∈ {4, 6, 8, 10, 12, 16, 20, 24}`. VQE covers a 7-point subset of `h` up to `L=20` (see `notebooks/03_vqe.ipynb`).
-- Hardware track (VQE on real MonarQ hardware): `L=2` only, 1 circuit layer. `L ∈ {4, 6}` were tried on MonarQ's noise-model simulator first and found to be noise-dominated at any usable depth regardless of qubit count — see `notebooks/05_monarq_hardware.ipynb` for the full characterization.
+- Hardware track (VQE on real MonarQ hardware): `L=2` only, 1 circuit layer. `L ∈ {4, 6}` were characterized on MonarQ's noise-model simulator first, to pick a point where a signal would survive — see `notebooks/05_monarq_hardware.ipynb` for that characterization and for what actually sets the noise.
 
 ## 3. Repo structure
 
 ```
 src/          hamiltonian.py, exact.py, nnqs.py, vqe.py — reusable library, run via CLI
+              mitigation.py — verified readout mitigation for MonarQ
 notebooks/    one notebook per method (01-03), plus cross-method analysis (04)
               and MonarQ hardware characterization (05)
 configs/      one YAML per sweep
 results/      {exact,nnqs,vqe_sim}/{L}/{h}.json — simulation-track sweeps
               vqe_gpu/{L}/{h}_layers{n}.json — VQE circuit-depth scan
-              monarq_sim/{L}/{h}_layers{n}.json — MonarQ noise-model characterization
+              monarq_sim/{L}/{h}_layers{n}.json — MonarQ noise-model characterization,
+                first pass: one training run and one measurement per point
+              monarq_sim_restarts/{L}/{h}_layers{n}.json — the same ladder retrained
+                from 20 random starts and measured 10 times; supersedes monarq_sim
+              monarq_mitigation/{L}/{h}_layers{n}_{raw,mitigated}.json — readout
+                mitigation measured against its own unmitigated counts
               vqe_hardware/{L}/{h}.json — real MonarQ hardware results
 figures/
 ```
@@ -60,4 +66,4 @@ MonarQ hardware runs (`src/vqe.py`'s `evaluate_on_device`) need real credentials
 
 - `notebooks/01_exact_diagonalization.ipynb`, `02_nnqs.ipynb`, `03_vqe.ipynb` — one method each. NNQS matches exact to well under 1% across the full range, including at the critical point. VQE matches at `L≤16` but degrades sharply at `L=20`; more circuit depth resolves most of that near the critical point, but only partially in the deep-ferromagnetic regime — two distinct failure mechanisms, detailed in `03_vqe.ipynb`.
 - `notebooks/04_analysis.ipynb` — all methods on shared figures, including the real hardware comparison at `L=2`.
-- `notebooks/05_monarq_hardware.ipynb` — why the hardware track stops at `L=2`: real MonarQ noise overwhelms this ansatz well before 10 circuit layers regardless of qubit count, readout error mitigation doesn't recover it, and real hardware performs measurably worse than the noise-model simulator predicts.
+- `notebooks/05_monarq_hardware.ipynb` — the MonarQ noise characterization. Noise overwhelms this ansatz well before 10 circuit layers, and what sets the loss is two-qubit gates *per qubit* rather than total gate count, so circuit depth is the binding constraint and qubit count only a secondary one. Readout error mitigation recovers a real part of the error at one layer but turns harmful by four. Real hardware performs measurably worse than the noise-model simulator, which models gate noise only — no relaxation or dephasing.

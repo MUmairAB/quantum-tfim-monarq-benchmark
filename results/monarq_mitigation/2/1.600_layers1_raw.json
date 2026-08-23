@@ -1,0 +1,91 @@
+{
+  "L": 2,
+  "h": 1.6,
+  "J": 1.0,
+  "n_layers": 1,
+  "method": "vqe_monarq_sim",
+  "device": "monarq.sim",
+  "boundary": "open",
+  "machine_name": "yamaska",
+  "mitigation": "none",
+  "noise_model": "live_calibration",
+  "two_qubit_gate_count": 1,
+  "measured_wires": [
+    [
+      9,
+      12
+    ],
+    [
+      9
+    ],
+    [
+      12
+    ]
+  ],
+  "E0_exact": -3.3526109228480427,
+  "E0_sim_noiseless": -3.352610922848042,
+  "n_restarts": 20,
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19
+  ],
+  "best_seed": 0,
+  "n_steps": 600,
+  "stepsize": 0.1,
+  "shots": 1000,
+  "n_repeats": 10,
+  "mitigation_verified": true,
+  "n_circuits": 30,
+  "n_counts_moved": 30,
+  "E0_values": [
+    -2.4752,
+    -2.537547147147147,
+    -2.5684,
+    -2.5040351648351646,
+    -2.530463136863137,
+    -2.5444000000000004,
+    -2.5384,
+    -2.5416000000000003,
+    -2.556385185185185,
+    -2.5512
+  ],
+  "E0": -2.5347630634030636,
+  "E0_std": 0.02695711997968515,
+  "E0_standard_error": 0.008524589829423702,
+  "rel_error": 0.2439435646621999,
+  "rel_error_standard_error": 0.0025426719728581164,
+  "paired_with_other_arm": true,
+  "paired_difference_values": [
+    -0.12519999999999998,
+    -0.14204604604604665,
+    -0.1447892107892108,
+    -0.14036483516483544,
+    -0.13513686313686346,
+    -0.1403792207792205,
+    -0.1455832167832165,
+    -0.1379999999999999,
+    -0.14641481481481522,
+    -0.13200000000000012
+  ],
+  "paired_difference_mean": -0.13899142075142085,
+  "paired_difference_standard_error": 0.0021088166650271075,
+  "wall_time_s": 7.164824959007092
+}
