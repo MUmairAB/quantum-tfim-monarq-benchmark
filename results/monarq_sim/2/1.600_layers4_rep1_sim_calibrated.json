@@ -1,0 +1,141 @@
+{
+  "L": 2,
+  "h": 1.6,
+  "J": 1.0,
+  "E0": -1.4341290709290708,
+  "E0_sim_noiseless": -3.352610883802173,
+  "E0_exact": -3.3526109228480427,
+  "rel_error": 0.5722351612125697,
+  "rel_error_sim": 1.1646406501437017e-08,
+  "signal_retention": 0.42776483878743027,
+  "terms": [
+    {
+      "term": "Z(0) @ Z(1)",
+      "wires": [
+        0,
+        1
+      ],
+      "device_wires": null,
+      "n_wires": 2,
+      "coeff": -1.0,
+      "expval": 0.07092907092907091,
+      "expval_noiseless": 0.2983625365237544,
+      "damping": 0.23772780509064964
+    },
+    {
+      "term": "X(0)",
+      "wires": [
+        0
+      ],
+      "device_wires": null,
+      "n_wires": 1,
+      "coeff": -1.6,
+      "expval": 0.39199999999999996,
+      "expval_noiseless": 0.9544526085245055,
+      "damping": 0.4107066149737862
+    },
+    {
+      "term": "X(1)",
+      "wires": [
+        1
+      ],
+      "device_wires": null,
+      "n_wires": 1,
+      "coeff": -1.6,
+      "expval": 0.45999999999999996,
+      "expval_noiseless": 0.9544526085245055,
+      "damping": 0.4819516400202593
+    }
+  ],
+  "terms_noiseless": [
+    {
+      "term": "Z(0) @ Z(1)",
+      "coeff": -1.0,
+      "expval": 0.2983625365237544
+    },
+    {
+      "term": "X(0)",
+      "coeff": -1.6,
+      "expval": 0.9544526085245055
+    },
+    {
+      "term": "X(1)",
+      "coeff": -1.6,
+      "expval": 0.9544526085245055
+    }
+  ],
+  "method": "monarq_sim",
+  "arm": "sim_calibrated",
+  "device": "monarq.sim",
+  "pinned_wires": null,
+  "processing_config": "default",
+  "boundary": "open",
+  "n_layers": 4,
+  "two_qubit_gate_count": 4,
+  "native_cz_count": 8,
+  "shots": 1000,
+  "repeat": 1,
+  "n_steps": 600,
+  "stepsize": 0.1,
+  "seed": 0,
+  "wall_time_s": 1.2049747080018278,
+  "submitted_at": "2026-08-23T22:17:23.041274+00:00",
+  "calibration": {
+    "machine": "yamaska",
+    "pulled_at": "2026-08-23T22:16:41.260061+00:00",
+    "usable_qubits": [
+      "9",
+      "10",
+      "11",
+      "12",
+      "13",
+      "14"
+    ],
+    "usable_couplers": [
+      "15",
+      "16",
+      "17",
+      "18",
+      "19"
+    ],
+    "qubits": {
+      "10": {
+        "single_qubit_gate_fidelity": 0.9942378987309551,
+        "readout_state0_fidelity": 0.976,
+        "readout_state1_fidelity": 0.878
+      },
+      "11": {
+        "single_qubit_gate_fidelity": 0.99598226569084,
+        "readout_state0_fidelity": 0.975,
+        "readout_state1_fidelity": 0.876
+      },
+      "12": {
+        "single_qubit_gate_fidelity": 0.9944401106148123,
+        "readout_state0_fidelity": 0.965,
+        "readout_state1_fidelity": 0.857
+      },
+      "13": {
+        "single_qubit_gate_fidelity": 0.9961595592897174,
+        "readout_state0_fidelity": 0.915,
+        "readout_state1_fidelity": 0.908
+      },
+      "14": {
+        "single_qubit_gate_fidelity": 0.9944324444846756,
+        "readout_state0_fidelity": 0.954,
+        "readout_state1_fidelity": 0.899
+      },
+      "9": {
+        "single_qubit_gate_fidelity": 0.9965221517645059,
+        "readout_state0_fidelity": 0.975,
+        "readout_state1_fidelity": 0.917
+      }
+    },
+    "couplers_cz_fidelity": {
+      "15": 0.9596445054453934,
+      "16": 0.9171882560861458,
+      "17": 0.9970791000802031,
+      "18": 0.9766936563701016,
+      "19": 0.940049203868724
+    }
+  }
+}

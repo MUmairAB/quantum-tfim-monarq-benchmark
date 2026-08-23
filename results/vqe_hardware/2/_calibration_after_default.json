@@ -1,0 +1,58 @@
+{
+  "machine": "yamaska",
+  "pulled_at": "2026-08-23T23:04:54.324099+00:00",
+  "usable_qubits": [
+    "9",
+    "10",
+    "11",
+    "12",
+    "13",
+    "14"
+  ],
+  "usable_couplers": [
+    "15",
+    "16",
+    "17",
+    "18",
+    "19"
+  ],
+  "qubits": {
+    "10": {
+      "single_qubit_gate_fidelity": 0.9942378987309551,
+      "readout_state0_fidelity": 0.976,
+      "readout_state1_fidelity": 0.878
+    },
+    "11": {
+      "single_qubit_gate_fidelity": 0.99598226569084,
+      "readout_state0_fidelity": 0.975,
+      "readout_state1_fidelity": 0.876
+    },
+    "12": {
+      "single_qubit_gate_fidelity": 0.9944401106148123,
+      "readout_state0_fidelity": 0.965,
+      "readout_state1_fidelity": 0.857
+    },
+    "13": {
+      "single_qubit_gate_fidelity": 0.9961595592897174,
+      "readout_state0_fidelity": 0.915,
+      "readout_state1_fidelity": 0.908
+    },
+    "14": {
+      "single_qubit_gate_fidelity": 0.9944324444846756,
+      "readout_state0_fidelity": 0.954,
+      "readout_state1_fidelity": 0.899
+    },
+    "9": {
+      "single_qubit_gate_fidelity": 0.9965221517645059,
+      "readout_state0_fidelity": 0.975,
+      "readout_state1_fidelity": 0.917
+    }
+  },
+  "couplers_cz_fidelity": {
+    "15": 0.9596445054453934,
+    "16": 0.9171882560861458,
+    "17": 0.9970791000802031,
+    "18": 0.9766936563701016,
+    "19": 0.940049203868724
+  }
+}

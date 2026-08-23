@@ -35,7 +35,17 @@ results/      {exact,nnqs,vqe_sim}/{L}/{h}.json — simulation-track sweeps
                 from 20 random starts and measured 10 times; supersedes monarq_sim
               monarq_mitigation/{L}/{h}_layers{n}_{raw,mitigated}.json — readout
                 mitigation measured against its own unmitigated counts
-              vqe_hardware/{L}/{h}.json — real MonarQ hardware results
+              monarq_sim/{L}/{h}_layers{n}_rep{r}_{sim,sim_calibrated}.json — the L=2
+                per-term repeats, 5 each, run against the generic noise constants
+                (sim) and against live calibration (sim_calibrated)
+              vqe_hardware/{L}/{h}.json — real MonarQ hardware results, first pass:
+                one unrepeated measurement per point, no uncertainty
+              vqe_hardware/{L}/{h}_layers{n}_rep{r}_{default,best}.json — per-term
+                hardware repeats, 5 each, measuring every Hamiltonian term
+                separately. Two qubit placements: whichever pair the plugin picks
+                (default) and the highest-CZ-fidelity pair on the chip (best)
+              vqe_hardware/2/per_term_summary.json — the above aggregated to a mean
+                and standard error per point
 figures/
 ```
 

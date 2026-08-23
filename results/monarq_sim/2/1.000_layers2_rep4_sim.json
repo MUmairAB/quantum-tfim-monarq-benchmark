@@ -1,0 +1,84 @@
+{
+  "L": 2,
+  "h": 1.0,
+  "J": 1.0,
+  "E0": -1.0539999999999998,
+  "E0_sim_noiseless": -2.236067977499789,
+  "E0_exact": -2.23606797749979,
+  "rel_error": 0.5286368703430444,
+  "rel_error_sim": 3.9720546451956367e-16,
+  "signal_retention": 0.4713631296569556,
+  "terms": [
+    {
+      "term": "Z(0) @ Z(1)",
+      "wires": [
+        0,
+        1
+      ],
+      "device_wires": null,
+      "n_wires": 2,
+      "coeff": -1.0,
+      "expval": 0.15400000000000003,
+      "expval_noiseless": 0.44721359549998196,
+      "damping": 0.34435446853494917
+    },
+    {
+      "term": "X(0)",
+      "wires": [
+        0
+      ],
+      "device_wires": null,
+      "n_wires": 1,
+      "coeff": -1.0,
+      "expval": 0.43999999999999995,
+      "expval_noiseless": 0.8944271909999034,
+      "damping": 0.49193495504996054
+    },
+    {
+      "term": "X(1)",
+      "wires": [
+        1
+      ],
+      "device_wires": null,
+      "n_wires": 1,
+      "coeff": -1.0,
+      "expval": 0.45999999999999996,
+      "expval_noiseless": 0.8944271909999034,
+      "damping": 0.5142956348249588
+    }
+  ],
+  "terms_noiseless": [
+    {
+      "term": "Z(0) @ Z(1)",
+      "coeff": -1.0,
+      "expval": 0.44721359549998196
+    },
+    {
+      "term": "X(0)",
+      "coeff": -1.0,
+      "expval": 0.8944271909999034
+    },
+    {
+      "term": "X(1)",
+      "coeff": -1.0,
+      "expval": 0.8944271909999034
+    }
+  ],
+  "method": "monarq_sim",
+  "arm": "sim",
+  "device": "monarq.sim",
+  "pinned_wires": null,
+  "processing_config": "default",
+  "boundary": "open",
+  "n_layers": 2,
+  "two_qubit_gate_count": 2,
+  "native_cz_count": 4,
+  "shots": 1000,
+  "repeat": 4,
+  "n_steps": 600,
+  "stepsize": 0.1,
+  "seed": 0,
+  "wall_time_s": 0.6170692089945078,
+  "submitted_at": "2026-08-23T22:16:22.789650+00:00",
+  "calibration": null
+}

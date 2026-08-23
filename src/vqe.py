@@ -136,7 +136,9 @@ def evaluate_on_device(
     shots: int = 1000,
     client=None,
     processing_config=None,
-) -> float:
+    return_terms: bool = False,
+    wires=None,
+):
     """Run an already-trained HVA circuit once on `device` and return the measured energy.
 
     `params` should come from `train_vqe` (a plain array of shape
@@ -157,6 +159,23 @@ def evaluate_on_device(
     while single-term expval values are correct. Per-term measurement works
     around it and costs one extra circuit execution per term either way.
 
+    With return_terms=True, also returns that per-term breakdown as a second
+    element: one dict per Hamiltonian term with its Pauli string, wires,
+    coefficient, and the expectation value before that coefficient is applied.
+    Comparing a term's measured value against its noiseless value gives the per-observable
+    damping factor directly, instead of inferring it from a fit to summed
+    energies. It costs nothing extra — the values are measured either way,
+    the default return just discards them.
+
+    `wires` pins the circuit to specific physical qubits: pass a list of L
+    device wires and logical qubit i is mapped to wires[i]. By default the
+    circuit is built on wires 0..L-1 and MonarQ's own placement step picks
+    the physical qubits. Pinning is only useful together with a
+    `processing_config` that skips placement (`NoPlaceNoRouteConfig`),
+    otherwise placement just overrides the choice. Handy for putting a
+    two-qubit circuit on the highest-fidelity coupler rather than whatever
+    the placement heuristic settles on.
+
     params gets converted to plain floats before use — passing the JAX
     arrays train_vqe returns straight through measurably degraded results
     on monarq.sim relative to the same circuit with plain-float angles,
@@ -168,7 +187,9 @@ def evaluate_on_device(
 
     params = np.asarray(params, dtype=float)
 
-    device_kwargs = {"wires": L}
+    wire_map = None if wires is None else {i: w for i, w in enumerate(wires)}
+
+    device_kwargs = {"wires": L if wires is None else list(wires)}
     if client is not None:
         device_kwargs["client"] = client
     if processing_config is not None:
@@ -178,9 +199,25 @@ def evaluate_on_device(
     H = build_pennylane_hamiltonian(L, h, J)
     coeffs, ops = H.terms()
     total = 0.0
+    terms = []
     for coeff, op in zip(coeffs, ops):
         circuit = build_circuit(L, op, dev, interface=None, diff_method=None, shots=shots)
-        total += coeff * circuit(params)
+        if wire_map is not None:
+            circuit = qml.map_wires(circuit, wire_map)
+        value = float(circuit(params))
+        total += float(coeff) * value
+        terms.append(
+            {
+                "term": str(op),
+                "wires": [int(w) for w in op.wires],
+                "device_wires": None if wire_map is None else [int(wire_map[int(w)]) for w in op.wires],
+                "n_wires": len(op.wires),
+                "coeff": float(coeff),
+                "expval": value,
+            }
+        )
+    if return_terms:
+        return float(total), terms
     return float(total)
 
 
