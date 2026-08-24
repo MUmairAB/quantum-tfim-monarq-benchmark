@@ -24,11 +24,14 @@ All three methods build this same Hamiltonian and boundary condition through `sr
 ```
 src/          hamiltonian.py, exact.py, nnqs.py, vqe.py — reusable library, run via CLI
               mitigation.py — verified readout mitigation for MonarQ
-notebooks/    one notebook per method (01-03), plus cross-method analysis (04)
-              and MonarQ hardware characterization (05)
+notebooks/    one notebook per method (01-03), plus cross-method analysis (04),
+              MonarQ hardware characterization (05), and the VQE seed ensemble (06)
 configs/      one YAML per sweep
 results/      {exact,nnqs,vqe_sim}/{L}/{h}.json — simulation-track sweeps
               vqe_gpu/{L}/{h}_layers{n}.json — VQE circuit-depth scan
+              vqe_seeds/{L}/{h}_layers{n}_seed{s}.json — the VQE grid repeated over
+                8 random seeds, so each point has a spread rather than one run;
+                summary.json aggregates each configuration
               monarq_sim/{L}/{h}_layers{n}.json — MonarQ noise-model characterization,
                 first pass: one training run and one measurement per point
               monarq_sim_restarts/{L}/{h}_layers{n}.json — the same ladder retrained
@@ -74,6 +77,7 @@ MonarQ hardware runs (`src/vqe.py`'s `evaluate_on_device`) need real credentials
 
 ## 6. Results
 
-- `notebooks/01_exact_diagonalization.ipynb`, `02_nnqs.ipynb`, `03_vqe.ipynb` — one method each. NNQS matches exact to well under 1% across the full range, including at the critical point. VQE matches at `L≤16` but degrades sharply at `L=20`; more circuit depth resolves most of that near the critical point, but only partially in the deep-ferromagnetic regime — two distinct failure mechanisms, detailed in `03_vqe.ipynb`.
+- `notebooks/01_exact_diagonalization.ipynb`, `02_nnqs.ipynb`, `03_vqe.ipynb` — one method each. NNQS matches exact to well under 1% across the full range, including at the critical point. VQE behaves differently in the two phases, and repeating each point over several seeds changes what that difference is — see `06_vqe_uncertainty.ipynb`.
 - `notebooks/04_analysis.ipynb` — all methods on shared figures, including the real hardware comparison at `L=2`.
 - `notebooks/05_monarq_hardware.ipynb` — the MonarQ noise characterization. Noise overwhelms this ansatz well before 10 circuit layers, and what sets the loss is two-qubit gates *per qubit* rather than total gate count, so circuit depth is the binding constraint and qubit count only a secondary one. Readout error mitigation recovers a real part of the error at one layer but turns harmful by four. Real hardware performs measurably worse than the noise-model simulator, which models gate noise only — no relaxation or dephasing.
+- `notebooks/06_vqe_uncertainty.ipynb` — every VQE point repeated over 8 seeds. A single training run is one draw from a distribution of local minima, and the spread turns out to matter: near the critical point at `L=20` the optimizer either converges to ~0.4% or fails outright, so the chain length changes how often it fails rather than how accurate it is. Added depth does not change the converged accuracy there; it only helps in the ferromagnetic regime. Quote the medians and the count of failed seeds rather than a mean and standard deviation — where the seeds split into two groups the mean describes neither.
