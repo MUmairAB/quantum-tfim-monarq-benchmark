@@ -1,0 +1,74 @@
+{
+  "L": 2,
+  "h": 1.0,
+  "J": 1.0,
+  "E0": -1.29,
+  "E0_sim_noiseless": -2.2360679774997885,
+  "E0_exact": -2.236067977499789,
+  "signal_retention": 0.5769055381949459,
+  "damping_vs_noiseless": 0.576905538194946,
+  "terms": [
+    {
+      "term": "Z(0) @ Z(1)",
+      "wires": [
+        0,
+        1
+      ],
+      "device_wires": [
+        13,
+        10
+      ],
+      "n_wires": 2,
+      "coeff": -1.0,
+      "expval": 0.18999999999999997,
+      "expval_noiseless": 0.4472135954999208,
+      "damping": 0.4248529157249953
+    },
+    {
+      "term": "X(0)",
+      "wires": [
+        0
+      ],
+      "device_wires": [
+        13
+      ],
+      "n_wires": 1,
+      "coeff": -1.0,
+      "expval": 0.38599999999999995,
+      "expval_noiseless": 0.894427190999934,
+      "damping": 0.43156111965745064
+    },
+    {
+      "term": "X(1)",
+      "wires": [
+        1
+      ],
+      "device_wires": [
+        10
+      ],
+      "n_wires": 1,
+      "coeff": -1.0,
+      "expval": 0.714,
+      "expval_noiseless": 0.894427190999934,
+      "damping": 0.7982762679674088
+    }
+  ],
+  "coupler": 17,
+  "wires": [
+    13,
+    10
+  ],
+  "cz_fidelity_at_run": 0.9103905513705901,
+  "method": "vqe_hardware",
+  "arm": "coupler17",
+  "origin": "coupler_scan",
+  "device": "monarq.default",
+  "n_layers": 1,
+  "shots": 1000,
+  "repeat": 3,
+  "n_steps": 600,
+  "stepsize": 0.1,
+  "seed": 0,
+  "wall_time_s": 23.790140166005585,
+  "submitted_at": "2026-08-24T19:56:21.835781+00:00"
+}
