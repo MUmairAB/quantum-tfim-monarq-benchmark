@@ -46,7 +46,11 @@ results/      {exact,nnqs,vqe_sim}/{L}/{h}.json — simulation-track sweeps
               vqe_hardware/{L}/{h}_layers{n}_rep{r}_{default,best}.json — per-term
                 hardware repeats, 5 each, measuring every Hamiltonian term
                 separately. Two qubit placements: whichever pair the plugin picks
-                (default) and the highest-CZ-fidelity pair on the chip (best)
+                (default) and the pair that measures best (best) — these were the
+                same pair when chosen, but see coupler*.json below
+              vqe_hardware/2/coupler{c}_{h}_rep{r}_perterm.json — the same circuit
+                on all five usable couplers, which is how the placement was checked
+                against the advertised fidelity rather than assumed from it
               vqe_hardware/2/per_term_summary.json — the above aggregated to a mean
                 and standard error per point
 figures/
