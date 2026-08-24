@@ -1,0 +1,144 @@
+{
+  "L": 6,
+  "h": 1.0,
+  "J": 1.0,
+  "n_layers": 1,
+  "method": "vqe_hardware",
+  "device": "monarq.default",
+  "boundary": "open",
+  "arm": "default",
+  "repeat": 0,
+  "E0": -2.344,
+  "E0_sim_noiseless": -7.059797185779585,
+  "E0_exact": -7.296229810558754,
+  "damping": 0.33202086948354187,
+  "rel_error": 0.6787381893306217,
+  "signal_retention": 0.3212618106693783,
+  "terms": [
+    {
+      "term": "Z(0) @ Z(1)",
+      "wires": [
+        0,
+        1
+      ],
+      "device_wires": null,
+      "n_wires": 2,
+      "coeff": -1.0,
+      "expval": 0.13199999999999998
+    },
+    {
+      "term": "Z(1) @ Z(2)",
+      "wires": [
+        1,
+        2
+      ],
+      "device_wires": null,
+      "n_wires": 2,
+      "coeff": -1.0,
+      "expval": -0.038000000000000006
+    },
+    {
+      "term": "Z(2) @ Z(3)",
+      "wires": [
+        2,
+        3
+      ],
+      "device_wires": null,
+      "n_wires": 2,
+      "coeff": -1.0,
+      "expval": 0.058000000000000024
+    },
+    {
+      "term": "Z(3) @ Z(4)",
+      "wires": [
+        3,
+        4
+      ],
+      "device_wires": null,
+      "n_wires": 2,
+      "coeff": -1.0,
+      "expval": 0.08600000000000002
+    },
+    {
+      "term": "Z(4) @ Z(5)",
+      "wires": [
+        4,
+        5
+      ],
+      "device_wires": null,
+      "n_wires": 2,
+      "coeff": -1.0,
+      "expval": -0.10200000000000004
+    },
+    {
+      "term": "X(0)",
+      "wires": [
+        0
+      ],
+      "device_wires": null,
+      "n_wires": 1,
+      "coeff": -1.0,
+      "expval": 0.488
+    },
+    {
+      "term": "X(1)",
+      "wires": [
+        1
+      ],
+      "device_wires": null,
+      "n_wires": 1,
+      "coeff": -1.0,
+      "expval": 0.12999999999999995
+    },
+    {
+      "term": "X(2)",
+      "wires": [
+        2
+      ],
+      "device_wires": null,
+      "n_wires": 1,
+      "coeff": -1.0,
+      "expval": 0.34800000000000003
+    },
+    {
+      "term": "X(3)",
+      "wires": [
+        3
+      ],
+      "device_wires": null,
+      "n_wires": 1,
+      "coeff": -1.0,
+      "expval": 0.38799999999999996
+    },
+    {
+      "term": "X(4)",
+      "wires": [
+        4
+      ],
+      "device_wires": null,
+      "n_wires": 1,
+      "coeff": -1.0,
+      "expval": 0.176
+    },
+    {
+      "term": "X(5)",
+      "wires": [
+        5
+      ],
+      "device_wires": null,
+      "n_wires": 1,
+      "coeff": -1.0,
+      "expval": 0.6779999999999999
+    }
+  ],
+  "two_qubit_gate_count": 5,
+  "native_cz_count": 10,
+  "n_steps": 600,
+  "stepsize": 0.1,
+  "seed": 11,
+  "n_restarts": 20,
+  "shots": 1000,
+  "wall_time_s": 96.64149887498934,
+  "submitted_at": "2026-08-24T04:10:30Z",
+  "origin": "ladder_runner"
+}
