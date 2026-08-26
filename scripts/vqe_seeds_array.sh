@@ -3,16 +3,19 @@
 #SBATCH --output=logs/vqe_seeds_%A_%a.out
 #SBATCH --cpus-per-task=1
 #SBATCH --mem=4G
-#SBATCH --time=03:00:00
+#SBATCH --time=12:00:00
 #
 # SLURM job array for the VQE seed ensemble: one array index per run (or per
 # chunk of runs, see CHUNK below), so independent runs go through the
 # scheduler concurrently instead of one after another.
 #
 # Each run is single-threaded and peaks around 0.6 GB at L=20, so one core and
-# 4 GB per task is comfortable. Pick --time from the deepest circuit in the
-# block and how busy the partition is; L=20 runs slow down substantially when
-# many of them share a node, so leave generous margin.
+# 4 GB per task is comfortable.
+#
+# 12 h, not 3. These are memory-bandwidth bound and slow down sharply when many
+# share a node, so --time has to cover the worst case the partition can inflict
+# rather than a typical run. SLURM also picks the partition from --time, so a
+# tight request silently caps the job.
 #
 # Submit with the block name and the array size that `--list` reports:
 #

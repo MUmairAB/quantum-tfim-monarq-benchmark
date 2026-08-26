@@ -71,19 +71,13 @@ blocks:
     h_values: [0.4, 0.8, 0.95, 1.0, 1.05, 1.2]
     n_layers_values: [16, 20, 24, 30]
 
-  # L=24 — the system size the VQE track previously stopped short of, while
-  # exact diagonalization and NNQS both reach it.
+  # L=24 — the size the VQE track previously stopped short of, while exact
+  # diagonalization and NNQS both reach it. The old cap was default.qubit's
+  # backprop keeping a statevector per gate; lightning.qubit's adjoint is O(2^L)
+  # regardless of depth and peaks at 2.0 GB here.
   #
-  # The old cap at L=20 was a memory limit of default.qubit's backprop, which
-  # keeps a statevector per gate, so cost grew with circuit depth and L=24 ran
-  # out of memory. lightning.qubit's adjoint differentiation is O(2^L)
-  # regardless of depth — measured at 1.9 GB peak for L=24 — so the reason for
-  # the cap no longer applies.
-  #
-  # Three h-values spanning the phase diagram (ferromagnetic, critical,
-  # paramagnetic) rather than the full 7-point subset, because each run is
-  # around six hours. Runs via scripts/vqe_L24_array.sh, which asks for more
-  # cores, more memory and a longer walltime than the L=20 array does.
+  # Three h-values spanning the phase diagram rather than the full seven,
+  # because each run takes 6-20 h. Runs via scripts/vqe_L24_array.sh.
   - name: c2_L24
     L_values: [24]
     h_values: [0.4, 1.0, 1.6]
