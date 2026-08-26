@@ -3,7 +3,7 @@
   "h": 0.0,
   "J": 1.0,
   "E0": -3.0,
-  "E0_mc_error": NaN,
+  "E0_mc_error": null,
   "E0_exact": -3.0,
   "rel_error": 0.0,
   "method": "nnqs",

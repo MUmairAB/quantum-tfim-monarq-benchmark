@@ -1,6 +1,15 @@
-# VQE (HVA, simulator only) full-L sweep, capped at L=20 — the statevector
-# simulator scales with 2^L and L=24 OOMs. h_values kept to the 7-point
-# validation subset rather than the full grid to keep L=20 cost manageable.
+# VQE (HVA, simulator only) full-L sweep, capped at L=20. h_values kept to the
+# 7-point validation subset rather than the full grid to keep L=20 cost
+# manageable.
+#
+# The L=20 cap is historical, not a limit. It came from default.qubit's backprop
+# keeping one statevector per gate, which does OOM at L=24. lightning.qubit's
+# adjoint is O(2^L) regardless of depth and peaks around 2.0 GB at L=24, so the
+# size is reachable — configs/vqe_seed_ensemble.yaml's c2_L24 block runs it, at
+# roughly 7-20 h per point.
+#
+# This sweep is superseded by results/vqe_seeds/, which repeats the same grid
+# over 8 seeds. Kept because it is the config that produced results/vqe_sim/.
 J: 1.0
 
 L_values: [4, 6, 8, 10, 12, 16, 20]

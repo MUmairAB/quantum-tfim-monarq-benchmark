@@ -81,9 +81,17 @@ def train_vqe(
 ):
     """Train the HVA and return (energy, two_qubit_gate_count).
 
-    two_qubit_gate_count = (L-1) * n_layers, the IsingZZ gate count — the
-    quantity that gates hardware feasibility on MonarQ. With
-    return_params=True, also returns the trained params (needed to hand a
+    two_qubit_gate_count = (L-1) * n_layers is the **logical** IsingZZ count,
+    i.e. the gates as written in the ansatz. It is not the number of gates the
+    hardware runs: MonarQ's native two-qubit gate is CZ, and each IsingZZ
+    transpiles to **2 CZ**, so the real device cost is twice this field.
+    Anyone comparing it against MonarQ's published two-qubit budget without
+    doubling it will be wrong by a factor of two. (That budget is quoted as a
+    circuit *depth* rather than a count, so the comparison also needs the
+    transpiled depth, not either gate total — see
+    notebooks/05_monarq_hardware.ipynb.)
+
+    With return_params=True, also returns the trained params (needed to hand a
     fixed, already-optimized circuit to evaluate_on_device for a hardware
     run) as a third element.
     """
@@ -121,6 +129,7 @@ def train_vqe(
         params, opt_state = step(params, opt_state)
 
     final_energy = float(circuit(params))
+    # Logical IsingZZ count. Doubles to 2*(L-1)*n_layers native CZ on MonarQ.
     two_qubit_gate_count = (L - 1) * n_layers
     if return_params:
         return final_energy, two_qubit_gate_count, params

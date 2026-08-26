@@ -1,13 +1,18 @@
 """Repeat every VQE point across several random seeds, so each energy comes
 with a real uncertainty instead of being a single unrepeated optimization.
 
-The VQE results already in `results/vqe_sim/` and `results/vqe_gpu/` are one
-run each at `seed=0`. The HVA optimizer is not convex, so a different
-parameter initialization can land in a different local minimum — and the
-spread between seeds turns out to be comparable to some of the effects we
-want to report. This module reruns the same grid over a set of seeds and
-writes one file per (L, h, n_layers, seed), so downstream analysis can quote
-mean +/- std rather than a single number.
+The VQE results already in `results/vqe_sim/` are one run each at `seed=0`.
+The HVA optimizer is not convex, so a different parameter initialization can
+land in a different local minimum — and the spread between seeds turns out to
+be comparable to some of the effects we want to report. This module reruns the
+same grid over a set of seeds and writes one file per (L, h, n_layers, seed),
+so downstream analysis has a spread to quote rather than a single number.
+
+Quote the median and a count of seeds over 1%, not mean +/- std. Near the
+critical point the seeds do not form one cluster: most converge to a few tenths
+of a percent and a few fail outright at 6-8%. A mean sits in the gap between the
+two groups and names a value no run produced. `--summarize` records median,
+quartiles and `n_above_1pct` for exactly this reason.
 
 Usage:
 

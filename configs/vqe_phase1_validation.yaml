@@ -3,6 +3,13 @@
 # three-way comparison. n_layers=10 chosen empirically — 4 layers wasn't
 # enough in the ferromagnetic regime (h=0.4), a circuit-depth limit rather
 # than an optimization bug.
+#
+# 10 layers is enough for this validation grid but not in general. Over 8 seeds
+# (results/vqe_seeds/), the median error at h=0.4 is 0.04% at L=4 and 0.10% at
+# L=6, but already 2.18% at L=8 and 3.93% at L=10, with all 8 seeds above 1% at
+# both sizes. So the depth that validates here does not carry to larger L in the
+# ferromagnetic phase. Everywhere else on this grid 10 layers stays well under
+# 1% at every L tested.
 J: 1.0
 
 L_values: [4, 6, 8, 10]

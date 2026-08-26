@@ -16,7 +16,7 @@ All three methods build this same Hamiltonian and boundary condition through `sr
 ## 2. Sweep grid
 
 - `h/J` from 0 to 2, step 0.2 away from criticality and 0.05 within `[0.7, 1.3]`.
-- Simulation track (exact + NNQS, classical compute): `L ∈ {4, 6, 8, 10, 12, 16, 20, 24}`. VQE covers a 7-point subset of `h` up to `L=20` (see `notebooks/03_vqe.ipynb`).
+- Simulation track (exact + NNQS, classical compute): `L ∈ {4, 6, 8, 10, 12, 16, 20, 24}`. VQE covers a 7-point subset of `h` at `L ≤ 20`, plus `L=24` at `h ∈ {0.4, 1.0, 1.6}` — the full grid is not run at `L=24` because a single point there takes 7-20 hours (see `notebooks/03_vqe.ipynb`).
 - Hardware track (VQE on real MonarQ hardware): `L=2` only, 1 circuit layer. `L ∈ {4, 6}` were characterized on MonarQ's noise-model simulator first, to pick a point where a signal would survive — see `notebooks/05_monarq_hardware.ipynb` for that characterization and for what actually sets the noise.
 
 ## 3. Repo structure
@@ -27,11 +27,16 @@ src/          hamiltonian.py, exact.py, nnqs.py, vqe.py — reusable library, ru
 notebooks/    one notebook per method (01-03), plus cross-method analysis (04),
               MonarQ hardware characterization (05), and the VQE seed ensemble (06)
 configs/      one YAML per sweep
-results/      {exact,nnqs,vqe_sim}/{L}/{h}.json — simulation-track sweeps
-              vqe_gpu/{L}/{h}_layers{n}.json — VQE circuit-depth scan
+results/      {exact,nnqs}/{L}/{h}.json — simulation-track sweeps. exact/2/ is
+                the L=2 hardware reference, not part of the simulation grid
               vqe_seeds/{L}/{h}_layers{n}_seed{s}.json — the VQE grid repeated over
-                8 random seeds, so each point has a spread rather than one run;
-                summary.json aggregates each configuration
+                8 random seeds and over circuit depth, so each point has a spread
+                rather than one run; summary.json aggregates each configuration
+                to a median, quartiles and a count of seeds over 1%. This is the
+                VQE dataset the analysis uses
+              vqe_sim/{L}/{h}.json — the earlier single-seed VQE sweep,
+                superseded by vqe_seeds/. Kept as the record of what one
+                unrepeated run per point looked like
               monarq_sim/{L}/{h}_layers{n}.json — MonarQ noise-model characterization,
                 first pass: one training run and one measurement per point
               monarq_sim_restarts/{L}/{h}_layers{n}.json — the same ladder retrained
@@ -69,19 +74,20 @@ pip install -r requirements.txt
 ## 5. Running a sweep
 
 ```bash
-python -m src.exact --config configs/exact_simulation_sweep.yaml
-python -m src.nnqs  --config configs/nnqs_simulation_sweep.yaml
-python -m src.vqe   --config configs/vqe_simulation_sweep.yaml
-python -m src.vqe   --config configs/vqe_gpu_L20_layer_scan.yaml --results-dir results/vqe_gpu
+python -m src.exact  --config configs/exact_simulation_sweep.yaml
+python -m src.nnqs   --config configs/nnqs_simulation_sweep.yaml
+python -m src.vqe    --config configs/vqe_simulation_sweep.yaml
+python -m src.vqe_seeds --config configs/vqe_seed_ensemble.yaml
+python -m src.vqe_seeds --config configs/vqe_seed_ensemble.yaml --summarize
 ```
 
-Each run writes one JSON file per `(L, h)` point and skips points that already have a result, so an interrupted sweep can just be rerun. The last command is the `L=20` circuit-depth scan, not a GPU run despite the filename — see `src/vqe.py`'s module docstring.
+Each run writes one JSON file per point and skips points that already have a result, so an interrupted sweep can just be rerun. The last two commands are the seed ensemble — the same grid over 8 seeds and several circuit depths — and the aggregation step that writes `results/vqe_seeds/summary.json`. The expensive blocks are meant for a job array rather than a serial run; see the config.
 
 MonarQ hardware runs (`src/vqe.py`'s `evaluate_on_device`) need real credentials and aren't a config-driven sweep — see `notebooks/05_monarq_hardware.ipynb` for the exact calls used.
 
 ## 6. Results
 
-- `notebooks/01_exact_diagonalization.ipynb`, `02_nnqs.ipynb`, `03_vqe.ipynb` — one method each. NNQS matches exact to well under 1% across the full range, including at the critical point. VQE behaves differently in the two phases, and repeating each point over several seeds changes what that difference is — see `06_vqe_uncertainty.ipynb`.
+- `notebooks/01_exact_diagonalization.ipynb`, `02_nnqs.ipynb`, `03_vqe.ipynb` — one method each. NNQS matches exact to within 0.12% at every one of its 168 points, and its worst point is in the ordered phase (`L=24`, `h=0.6`) rather than at the critical point, which is where it is usually at its best. VQE behaves differently in the two phases: at fixed 10-layer depth its 8-seed median error grows with `L` in the ferromagnetic regime (0.04% at `L=4` to ~6% from `L=20` on, at `h=0.4`) and stays under 1% at every `L` near and above `h_c`. Repeating each point over several seeds changes what that difference is — see `06_vqe_uncertainty.ipynb`.
 - `notebooks/04_analysis.ipynb` — all methods on shared figures, including the real hardware comparison at `L=2`.
 - `notebooks/05_monarq_hardware.ipynb` — the MonarQ noise characterization. Noise overwhelms this ansatz well before 10 circuit layers, and what sets the loss is two-qubit gates *per qubit* rather than total gate count, so circuit depth is the binding constraint and qubit count only a secondary one. Readout error mitigation recovers a real part of the error at one layer but turns harmful by four. Real hardware performs measurably worse than the noise-model simulator, which models gate noise only — no relaxation or dephasing.
 - `notebooks/06_vqe_uncertainty.ipynb` — every VQE point repeated over 8 seeds. A single training run is one draw from a distribution of local minima, and the spread turns out to matter: near the critical point at `L=20` the optimizer either converges to ~0.4% or fails outright, so the chain length changes how often it fails rather than how accurate it is. Added depth does not change the converged accuracy there; it only helps in the ferromagnetic regime. Quote the medians and the count of failed seeds rather than a mean and standard deviation — where the seeds split into two groups the mean describes neither.

@@ -1,0 +1,17 @@
+# L=2 ground truth for the hardware track.
+#
+# The hardware runs sit at L=2, which is not part of the simulation-track grid
+# in exact_simulation_sweep.yaml (that starts at L=4). Every hardware result
+# file carries an `E0_exact` that was recomputed on the fly and never archived,
+# so the reference the hardware numbers are measured against was not in the
+# dataset. This config archives it.
+#
+# Cheap enough to be worth having: a 2-site diagonalization is instant, and the
+# answer is checkable by hand — E0 = -sqrt(J^2 + 4h^2) for the open 2-site chain.
+#
+# Note L=2 is deliberately kept out of the simulation-track figures: it is a
+# hardware reference, not a system size the classical comparison covers.
+J: 1.0
+
+L_values: [2]
+h_values: [0.4, 1.0, 1.6]

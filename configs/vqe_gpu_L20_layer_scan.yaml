@@ -1,5 +1,17 @@
-# L=20 deeper-layers rerun: n_layers=10 wasn't accurate enough away from
-# h_c=1.6, so scan depth (16-30 layers) to see where accuracy saturates.
+# L=20 deeper-layers rerun: n_layers=10 wasn't accurate enough, so scan depth
+# (16-30 layers) to see where accuracy saturates.
+#
+# The critical point is h_c = 1. h=1.6 is deep in the paramagnetic phase and is
+# the *easiest* value on this grid — the one h where VQE never exceeds 1% at any
+# L, which is why it is left out of the scan below. The error grows the other
+# way: it is worst at h=0.4, deep in the ferromagnetic phase.
+#
+# What this scan measures, read against the seed ensemble (results/vqe_seeds/):
+# depth is the lever in the ferromagnetic regime and does nothing near h_c. At
+# h=0.4 the median error falls 6.16% -> 2.59% over 10 -> 30 layers and never
+# reaches 1%; near h_c the converged runs are already at a few tenths of a
+# percent at 10 layers and depth does not move them.
+#
 # Filename kept as "vqe_gpu_*" for continuity with the earlier GPU data
 # point, though this config runs on lightning.qubit (CPU) — see src/vqe.py.
 # Run vqe_gpu_L20_timing_test.yaml first to check timing before this one.

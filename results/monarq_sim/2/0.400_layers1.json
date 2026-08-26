@@ -8,6 +8,7 @@
   "rel_error_sim": 5.201631188731717e-16,
   "rel_error_hardware_sim": 0.45339183338987876,
   "method": "vqe_monarq_sim",
+  "boundary": "open",
   "device": "monarq.sim",
   "mitigation": "none",
   "two_qubit_gate_count": 1,

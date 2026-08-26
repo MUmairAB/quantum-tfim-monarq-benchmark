@@ -1,10 +1,15 @@
 # Seed ensemble for the VQE track.
 #
-# Every VQE point in results/vqe_sim/ and results/vqe_gpu/ is a single run at
-# seed=0. The HVA optimizer lands in different local minima from different
-# random initializations, and the spread between seeds is large enough that
-# some reported effects need to be checked against it. This config reruns the
-# grid over 8 seeds so every number can be quoted as mean +/- std.
+# Every VQE point in results/vqe_sim/ is a single run at seed=0. The HVA
+# optimizer lands in different local minima from different random
+# initializations, and the spread between seeds is large enough that some
+# reported effects need to be checked against it. This config reruns the grid
+# over 8 seeds so every number can be quoted with a spread.
+#
+# Quote the median and the count of seeds over 1%, not mean +/- std. Near h_c
+# the seeds split into two groups — most converge to a few tenths of a percent,
+# a few fail outright at 6-8% — and a mean lands in the gap between them,
+# describing neither. summary.json records median, quartiles and n_above_1pct.
 #
 # n_steps and stepsize are held at the published values (600, 0.1) so the seed
 # is the only thing that changes.
@@ -53,13 +58,11 @@ blocks:
     h_values: [0.4, 0.8, 0.95, 1.0, 1.05, 1.2, 1.6]
     n_layers_values: [10]
 
-  # The full L=20 depth x h matrix. NOT run by default — it is the expensive
-  # tier, and the blocks above already answer the questions the analysis needs.
-  # Kept here so the wider scan has a home in this directory rather than a
-  # second one: results/vqe_gpu/ is where the original unseeded depth scan
-  # lives, but that name describes a GPU run that never happened (those points
-  # were computed on CPU), and splitting one ensemble across two directories
-  # and two file schemas would make that worse.
+  # The full L=20 depth x h matrix. This is the expensive tier, and it is the
+  # scan the depth claims rest on: it replaced an earlier four-point unseeded
+  # scan that lived in its own directory under a name describing a GPU run that
+  # never happened (those points were computed on CPU). That directory has since
+  # been retired, so the whole ensemble now lives here under one file schema.
   #
   # 168 runs after the overlap with p1 is removed. Far too slow to run one
   # after another, but as a job array with a slot per run it takes roughly as

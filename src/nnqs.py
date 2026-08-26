@@ -88,12 +88,18 @@ def run_sweep(config: dict, results_dir: Path, exact_dir: Path) -> None:
             E_exact = load_exact_E0(L, h, exact_dir)
             rel_error = abs(E_mean - E_exact) / abs(E_exact) if E_exact is not None else None
 
+            # At h=0 the RBM represents the ground state exactly, so the Monte
+            # Carlo variance is identically zero and NetKet returns NaN. JSON has
+            # no NaN literal (RFC 8259), and a bare NaN makes the file unreadable
+            # to strict parsers, so store it as null instead.
+            E_err_out = None if E_err != E_err else E_err
+
             record = {
                 "L": L,
                 "h": h,
                 "J": J,
                 "E0": E_mean,
-                "E0_mc_error": E_err,
+                "E0_mc_error": E_err_out,
                 "E0_exact": E_exact,
                 "rel_error": rel_error,
                 "method": "nnqs",
@@ -101,11 +107,14 @@ def run_sweep(config: dict, results_dir: Path, exact_dir: Path) -> None:
                 "wall_time_s": elapsed,
                 **train_kwargs,
             }
-            out_path.write_text(json.dumps(record, indent=2))
+            # allow_nan=False turns any remaining non-finite value into an
+            # error rather than an unparseable file.
+            out_path.write_text(json.dumps(record, indent=2, allow_nan=False))
 
             rel_str = f"{rel_error:.4%}" if rel_error is not None else "n/a (no exact ref)"
+            err_str = f"{E_err:.1e}" if E_err_out is not None else "n/a (exact, zero variance)"
             print(
-                f"L={L:<3} h={h:.3f}  E0={E_mean:.6f}±{E_err:.1e}  "
+                f"L={L:<3} h={h:.3f}  E0={E_mean:.6f}±{err_str}  "
                 f"rel_err={rel_str}  ({elapsed:.1f}s) -> {out_path}"
             )
 

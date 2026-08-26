@@ -28,9 +28,12 @@ def ground_state_energy(L: int, h: float, J: float = 1.0, basis=None) -> float:
 def run_sweep(config: dict, results_dir: Path) -> None:
     """Run the full L x h sweep from a config dict, writing one JSON file per
     point. Resumable: points that already have an output file are skipped,
-    so a crashed or interrupted run can just be rerun."""
+    so a crashed or interrupted run can just be rerun.
+
+    h-values come from an explicit `h_values` list or a `h_grid` spec
+    (build_h_grid kwargs), the same two forms src/nnqs.py and src/vqe.py accept."""
     J = config.get("J", 1.0)
-    h_grid = build_h_grid(**config.get("h_grid", {}))
+    h_grid = config["h_values"] if "h_values" in config else build_h_grid(**config.get("h_grid", {}))
     L_values = config["L_values"]
 
     for L in L_values:
