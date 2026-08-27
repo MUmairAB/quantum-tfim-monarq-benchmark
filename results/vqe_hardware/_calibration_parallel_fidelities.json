@@ -1,0 +1,17 @@
+{
+  "description": "Parallel single-qubit gate fidelities for the calibration epoch in which the hardware runs were executed. Archived separately because the per-run calibration blocks store only the isolated figure, while the parallel figure is the one that binds for a circuit driving its qubits together.",
+  "machine": "yamaska",
+  "epoch": "in effect across all hardware runs, 2026-08-23T22:18:43Z to 2026-08-24T04:14:04Z",
+  "source": "git show fa7d2fe:notebooks/05_monarq_hardware.ipynb -- the committed output of the benchmark-payload cell, as executed during the hardware session.",
+  "dating": "The isolated column of that same output matches the calibration block archived with every hardware run on all six qubits, to four decimals. All seven distinct pulls stamped across those runs carry identical isolated fidelities, so the epoch is unambiguous.",
+  "caveat": "That notebook cell was re-executed later and committed in 3d8875e, replacing this output with a fresh pull (isolated q9 0.9956, q10 0.9956, q11 0.9953, q12 0.9943, q13 0.9972, q14 0.9941; parallel q13 0.9834). The current working copy therefore shows a pull that matches no archived run and is NOT contemporaneous with the measurements. Use the values in this file, not the ones the notebook currently displays.",
+  "qubits": {
+    "9":  {"single_qubit_gate_fidelity": 0.9965, "parallel_single_qubit_gate_fidelity": 0.9907},
+    "10": {"single_qubit_gate_fidelity": 0.9942, "parallel_single_qubit_gate_fidelity": 0.9871},
+    "11": {"single_qubit_gate_fidelity": 0.9960, "parallel_single_qubit_gate_fidelity": 0.9933},
+    "12": {"single_qubit_gate_fidelity": 0.9944, "parallel_single_qubit_gate_fidelity": 0.9907},
+    "13": {"single_qubit_gate_fidelity": 0.9962, "parallel_single_qubit_gate_fidelity": 0.9749},
+    "14": {"single_qubit_gate_fidelity": 0.9944, "parallel_single_qubit_gate_fidelity": 0.9934}
+  },
+  "usage": "The L=2 placement arms ran on wires [9, 12] (default) and [13, 10] (pinned). Compounding the parallel figures over the 13 X90 pulses each qubit receives in the 4-layer circuit gives 0.784 survival for 9-12 and 0.607 for 13-10, which is the measured inversion. The isolated figures give 0.888 and 0.882, which nearly erases it."
+}
