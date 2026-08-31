@@ -25,13 +25,24 @@ the mitigation step inverts, so on the simulator the correction is exact by
 construction. What it recovers is the readout-error share of the total error —
 an upper bound on what mitigation could recover on real hardware, not a
 prediction of it.
+
+That caveat is a property of the simulator, not of this code. `device` is a
+parameter on the measurement functions below, so the same paired measurement
+runs against `monarq.default`, where the correction inverts a calibration
+matrix it did not generate and the result is a measurement rather than a
+ceiling. Quote the two differently: a simulator number bounds what mitigation
+could recover, a hardware number is what it did recover.
 """
 from __future__ import annotations
 
 from dataclasses import dataclass
 from statistics import mean, stdev
 
-from pennylane_calculquebec.processing.config import MonarqDefaultConfig, ProcessingConfig
+from pennylane_calculquebec.processing.config import (
+    MonarqDefaultConfig,
+    NoPlaceNoRouteConfig,
+    ProcessingConfig,
+)
 from pennylane_calculquebec.processing.steps.readout_error_mitigation import (
     MatrixReadoutMitigation,
     all_results,
@@ -195,8 +206,9 @@ def _as_counts(results, n_wires: int) -> dict[str, float]:
     return {label: float(value) for label, value in all_results(results, n_wires).items()}
 
 
-def mitigated_config(machine_name: str = MACHINE_NAME, use_benchmark: bool = True) -> ProcessingConfig:
-    """MonarQ's default transpilation pipeline with verified readout mitigation on the end.
+def mitigated_config(machine_name: str = MACHINE_NAME, use_benchmark: bool = True,
+                     place_and_route: bool = True) -> ProcessingConfig:
+    """MonarQ's transpilation pipeline with verified readout mitigation on the end.
 
     `use_benchmark` has to agree with whether the device is given a client:
     monarq.sim sets its own noise model from `client is not None`, and a config
@@ -204,35 +216,55 @@ def mitigated_config(machine_name: str = MACHINE_NAME, use_benchmark: bool = Tru
     surfaces much later as "Your circuit should contain only MonarQ native
     gates. Cannot simulate noise."
 
+    `place_and_route=False` drops the placement and routing steps, which is what
+    makes `evaluate_on_device`'s `wires` argument mean anything — otherwise
+    placement chooses the physical qubits and silently overrides the pinning.
+    It takes no benchmark, so `use_benchmark` does not apply to it.
+
     The mitigation step is the last one, so grab it with `config.steps[-1]` if
     you want its records.
     """
-    config = MonarqDefaultConfig(machine_name, use_benchmark=use_benchmark)
+    if place_and_route:
+        config = MonarqDefaultConfig(machine_name, use_benchmark=use_benchmark)
+    else:
+        config = NoPlaceNoRouteConfig()
     config.steps.append(VerifiedReadoutMitigation(machine_name))
     return config
 
 
-def measure_raw_and_mitigated(L, h, params, J=1.0, client=None, shots=1000, machine_name=MACHINE_NAME):
-    """Measure a trained circuit on monarq.sim and return raw and mitigated energies from the same shots.
+def measure_raw_and_mitigated(L, h, params, J=1.0, client=None, shots=1000,
+                              machine_name=MACHINE_NAME, device="monarq.sim", wires=None):
+    """Measure a trained circuit once and return raw and mitigated energies from the same shots.
 
     Readout mitigation is pure post-processing of measured counts, so both
     energies come out of one set of circuit executions: the mitigation step
     keeps the counts it was handed alongside the ones it produced. Pairing them
     this way takes shot noise out of the comparison entirely — the two energies
-    differ by the correction and nothing else.
+    differ by the correction and nothing else. It also means placement cannot
+    confound the paired difference, since both arms come from the same circuit.
+
+    `device` defaults to the simulator. Pass "monarq.default" to run the same
+    measurement on hardware; see the module docstring for why the two are not
+    interchangeable when quoting a result. `wires` pins the physical qubits and
+    only has an effect on hardware, where it also switches the pipeline to the
+    no-placement config so the pinning survives.
 
     A `client` is required. Without one the plugin cannot read the calibration,
     and this raises rather than quietly reporting a raw number twice.
 
     Returns (E_raw, E_mitigated, records).
     """
-    config = mitigated_config(machine_name, use_benchmark=client is not None)
+    config = mitigated_config(
+        machine_name,
+        use_benchmark=client is not None,
+        place_and_route=wires is None,
+    )
     step = config.steps[-1]
     step.reset()
 
     E_mitigated = evaluate_on_device(
-        L, h, params, J=J, device="monarq.sim", shots=shots,
-        client=client, processing_config=config,
+        L, h, params, J=J, device=device, shots=shots,
+        client=client, processing_config=config, wires=wires,
     )
     step.raise_if_not_applied()
 
@@ -253,7 +285,8 @@ def measure_raw_and_mitigated(L, h, params, J=1.0, client=None, shots=1000, mach
 
 
 def repeat_raw_and_mitigated(L, h, params, n_repeats=10, J=1.0, client=None, shots=1000,
-                             machine_name=MACHINE_NAME, verbose=True) -> dict:
+                             machine_name=MACHINE_NAME, device="monarq.sim", wires=None,
+                             verbose=True) -> dict:
     """Repeat `measure_raw_and_mitigated` and summarise the spread.
 
     A single 1000-shot measurement of this energy carries a few percent of
@@ -267,7 +300,8 @@ def repeat_raw_and_mitigated(L, h, params, n_repeats=10, J=1.0, client=None, sho
     n_circuits = n_moved = 0
     for i in range(n_repeats):
         E_raw, E_mitigated, records = measure_raw_and_mitigated(
-            L, h, params, J=J, client=client, shots=shots, machine_name=machine_name
+            L, h, params, J=J, client=client, shots=shots, machine_name=machine_name,
+            device=device, wires=wires,
         )
         raw_values.append(E_raw)
         mitigated_values.append(E_mitigated)
