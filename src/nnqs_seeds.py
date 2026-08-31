@@ -1,31 +1,19 @@
-"""Repeat every NNQS point across several random seeds, and across sampling
-budgets, so the RBM track carries the same kind of uncertainty as the VQE one.
+"""Repeat every NNQS point across several random seeds and sampling budgets, so
+the RBM track carries the same kind of uncertainty as the VQE one.
 
-Every file in `results/nnqs/` is a single run at `seed=0`. That asymmetry is a
-problem on its own — the VQE track is quoted as a spread over eight seeds while
-the RBM track is quoted from one run — but there is a second, sharper reason to
-repeat these.
+Every file in `results/nnqs/` is a single run at `seed=0`, which is already an
+asymmetry when the VQE track is quoted as a spread over eight. The sharper
+reason is that the deviation from exact tracks the reported Monte Carlo error
+closely across that grid, so the accuracy on record may be measuring the
+sampling floor at `n_samples=1024` rather than the ansatz. One run per point
+cannot tell those apart; repeats at several budgets can.
 
-An NNQS energy comes with a Monte Carlo standard error, and across the existing
-grid the absolute deviation from exact tracks that standard error closely. So
-the reported accuracy may be measuring the sampling floor at `n_samples=1024`
-rather than the quality of the ansatz. Those two possibilities are
-indistinguishable from one run per point. They separate cleanly with repeats:
-
-  * if the RBM is genuinely near-exact, the seed-to-seed spread should be about
-    the size of the quoted MC error, and shrinking the sampling budget's noise
-    (larger `n_samples`) should reduce the deviation from exact;
-  * if the ansatz is the limit, the deviation stops falling once sampling noise
-    drops below it, and the seed spread exceeds the quoted error.
-
-`--summarize` therefore records `spread_over_mc_error` — the standard deviation
-of E0 across seeds divided by the mean quoted MC error — alongside the usual
-statistics. A value near 1 means the error bar is honest; a value well above 1
-means the quoted uncertainty understates run-to-run variation.
-
-It also records `n_below_exact`, the number of seeds whose energy falls below
-the exact ground state. A true variational expectation value cannot, so any
-such point is measuring noise rather than a variational bound.
+`--summarize` records two things for that question. `spread_over_mc_error` is
+the standard deviation of E0 across seeds over the mean quoted error — near 1
+when the error bar describes the run-to-run variation, well above 1 when it
+understates it. `n_below_exact` counts seeds landing below the exact ground
+state, which a variational expectation value cannot do, so a nonzero count
+marks a point that is reporting noise rather than a bound.
 
 Usage mirrors src/vqe_seeds.py exactly:
 
