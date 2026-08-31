@@ -28,11 +28,17 @@ def train_nnqs(
     learning_rate: float = 0.02,
     diag_shift: float = 0.01,
     seed: int | None = None,
+    show_progress: bool = True,
 ) -> tuple[float, float]:
     """Train an RBM ground state via VMC and return (energy_mean, energy_error).
 
     energy_error is the Monte Carlo standard error on the mean, not a bound
     on distance to the true ground state.
+
+    show_progress drives NetKet's per-iteration progress bar. It is on by
+    default so an interactive sweep still shows one, but batch callers should
+    turn it off: the bar redraws every iteration and writes roughly 50 kB per
+    run, which becomes tens of megabytes of SLURM logs across a full ensemble.
     """
     import netket as nk
 
@@ -46,7 +52,7 @@ def train_nnqs(
     gs = nk.driver.VMC(
         H, optimizer, variational_state=vstate, preconditioner=preconditioner
     )
-    gs.run(n_iter=n_iter, out=None)
+    gs.run(n_iter=n_iter, out=None, show_progress=show_progress)
 
     stats = vstate.expect(H)
     return float(stats.mean.real), float(stats.error_of_mean)

@@ -85,3 +85,63 @@ blocks:
     L_values: [24]
     h_values: [0.4, 1.0, 1.6]
     n_layers_values: [10]
+
+  # ---------------------------------------------------------------------------
+  # Expansion, 2026-08-31: more seeds where the claims are about a failure rate.
+  #
+  # Eight seeds resolve a rate poorly. Two of eight is 25% with a 95% interval
+  # of 7-59%, which is too wide to compare one configuration against another.
+  # Forty seeds narrow that to about +/-13 points.
+  #
+  # Appended rather than folded into the blocks above: expand_specs walks blocks
+  # in order, so array indices 0-607 keep pointing at the runs they pointed at
+  # before. --blocks re-indexes from zero within the selected block.
+  #
+  # Seed ranges are disjoint from 0-7, and x4_L24_hgrid uses h-values c2_L24
+  # does not, so nothing here overlaps an existing point.
+  # ---------------------------------------------------------------------------
+
+  # The claim the paper leans on hardest: near h_c most seeds converge below 1%
+  # and a couple fail outright. 4 h-values x 32 seeds = 128 runs.
+  - name: x1_nearcrit_seeds
+    L_values: [20]
+    h_values: [0.95, 1.0, 1.05, 1.2]
+    n_layers_values: [10]
+    seeds: [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
+      25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39]
+
+  # Whether depth removes that failure mode. Pooled over h the existing data
+  # already suggests it does (6/32 catastrophic at 10 layers against 4/128 at
+  # 16 and above), but no single depth cell has the seeds to show it.
+  # 4 depths x 32 seeds = 128 runs.
+  - name: x2_depth_seeds
+    L_values: [20]
+    h_values: [1.0]
+    n_layers_values: [16, 20, 24, 30]
+    seeds: [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
+      25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39]
+
+  # The control. At L <= 16 near h_c no seed has ever failed, but 0/8 only
+  # bounds the rate below 31% — not enough to say the failure mode is absent
+  # rather than undersampled. 0/64 bounds it below 5.6%. These runs are seconds
+  # each; the whole block is under 20 core-hours.
+  # 6 L x 7 h x 56 seeds = 2352 runs.
+  - name: x3_smallL_seeds
+    L_values: [4, 6, 8, 10, 12, 16]
+    h_values: [0.4, 0.8, 0.95, 1.0, 1.05, 1.2, 1.6]
+    n_layers_values: [10]
+    seeds: [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
+      25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41,
+      42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58,
+      59, 60, 61, 62, 63]
+
+  # Completes the L=24 field grid, which c2_L24 covers at three h-values only.
+  # local_only/fir_timing/0.800_layers10_seed0.json is already seed 0 of the
+  # h=0.8 column and can be moved into results/vqe_seeds/24/ unchanged before
+  # this runs; the runner will then skip that one point.
+  # 4 h x 8 seeds = 32 runs.
+  - name: x4_L24_hgrid
+    L_values: [24]
+    h_values: [0.8, 0.95, 1.05, 1.2]
+    n_layers_values: [10]
+    seeds: [0, 1, 2, 3, 4, 5, 6, 7]

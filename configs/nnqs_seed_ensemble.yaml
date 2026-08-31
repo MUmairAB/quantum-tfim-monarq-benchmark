@@ -1,0 +1,57 @@
+# Seed ensemble and sampling-budget ablation for the NNQS track.
+#
+# Every file in results/nnqs/ is a single run at seed=0. The VQE track is
+# quoted as a spread over eight seeds, so quoting the RBM track from one run
+# is an asymmetry in the comparison before it is anything else.
+#
+# The sharper reason is that NNQS absolute error tracks the reported Monte
+# Carlo standard error closely across the existing grid. That is consistent
+# with two different situations — an ansatz that is genuinely near-exact, and
+# an ansatz whose error is simply below the sampling floor at n_samples=1024 —
+# and one run per point cannot tell them apart. Repeats plus a budget scan can:
+# see the module docstring in src/nnqs_seeds.py for what each outcome implies.
+#
+# These runs do NOT reproduce results/nnqs/ and are not meant to. That set is
+# one seed under the same hyperparameters; this is a new, internally consistent
+# ensemble written to its own directory. Compare within it, not against the old
+# single-run values.
+#
+# Everything else is held at the published values (alpha 2, n_iter 300,
+# learning rate 0.02, diag_shift 0.01) so the seed and the sampling budget are
+# the only things that change.
+#
+# Blocks are run in order and can be selected with --blocks. See
+# src/nnqs_seeds.py.
+
+method: nnqs_seed_ensemble
+J: 1.0
+
+seeds: [0, 1, 2, 3, 4, 5, 6, 7]
+
+train:
+  alpha: 2
+  n_samples: 1024
+  n_iter: 300
+  learning_rate: 0.02
+  diag_shift: 0.01
+
+blocks:
+  # The whole simulation grid at the published sampling budget, repeated over
+  # eight seeds. 8 L-values x 21 h-values x 8 seeds = 1344 runs, and the mean
+  # run is about 14 s, so the block is roughly 5 core-hours in total.
+  - name: e1_seed_ensemble
+    L_values: [4, 6, 8, 10, 12, 16, 20, 24]
+    h_grid: {}          # the default 21-point field grid, same as the exact sweep
+    n_samples_values: [1024]
+
+  # Does the deviation from exact keep falling as sampling noise drops, or does
+  # it stop at a floor set by the ansatz? Two h-values at three sizes: h=0.6 is
+  # where the largest NNQS errors sit at every L, and h=1.0 is the critical
+  # point. Combined with e1 above, each point ends up with three budgets.
+  #
+  # 3 L x 2 h x 2 budgets x 8 seeds = 96 runs. The 16384-sample runs at L=24
+  # are the slowest here at roughly 8 minutes each.
+  - name: e2_nsamples_ablation
+    L_values: [8, 16, 24]
+    h_values: [0.6, 1.0]
+    n_samples_values: [4096, 16384]

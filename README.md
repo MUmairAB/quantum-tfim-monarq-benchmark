@@ -23,12 +23,18 @@ All three methods build this same Hamiltonian and boundary condition through `sr
 
 ```
 src/          hamiltonian.py, exact.py, nnqs.py, vqe.py — reusable library, run via CLI
+              vqe_seeds.py, nnqs_seeds.py — the same grids repeated over seeds
               mitigation.py — verified readout mitigation for MonarQ
 notebooks/    one notebook per method (01-03), plus cross-method analysis (04),
               MonarQ hardware characterization (05), and the VQE seed ensemble (06)
 configs/      one YAML per sweep
 results/      {exact,nnqs}/{L}/{h}.json — simulation-track sweeps. exact/2/ is
                 the L=2 hardware reference, not part of the simulation grid
+              nnqs_seeds/{L}/{h}_ns{n}_seed{s}.json — the NNQS grid repeated over
+                seeds and over sampling budget, so the RBM track carries a spread
+                like the VQE one and the sampling floor can be told apart from
+                the ansatz limit; summary.json also records how the seed spread
+                compares with the quoted Monte Carlo error
               vqe_seeds/{L}/{h}_layers{n}_seed{s}.json — the VQE grid repeated over
                 8 random seeds and over circuit depth, so each point has a spread
                 rather than one run; summary.json aggregates each configuration
@@ -77,11 +83,13 @@ pip install -r requirements.txt
 python -m src.exact  --config configs/exact_simulation_sweep.yaml
 python -m src.nnqs   --config configs/nnqs_simulation_sweep.yaml
 python -m src.vqe    --config configs/vqe_simulation_sweep.yaml
-python -m src.vqe_seeds --config configs/vqe_seed_ensemble.yaml
-python -m src.vqe_seeds --config configs/vqe_seed_ensemble.yaml --summarize
+python -m src.vqe_seeds  --config configs/vqe_seed_ensemble.yaml
+python -m src.vqe_seeds  --config configs/vqe_seed_ensemble.yaml --summarize
+python -m src.nnqs_seeds --config configs/nnqs_seed_ensemble.yaml
+python -m src.nnqs_seeds --config configs/nnqs_seed_ensemble.yaml --summarize
 ```
 
-Each run writes one JSON file per point and skips points that already have a result, so an interrupted sweep can just be rerun. The last two commands are the seed ensemble — the same grid over 8 seeds and several circuit depths — and the aggregation step that writes `results/vqe_seeds/summary.json`. The expensive blocks are meant for a job array rather than a serial run; see the config.
+Each run writes one JSON file per point and skips points that already have a result, so an interrupted sweep can just be rerun. The last four commands are the two seed ensembles and their aggregation steps. Both are organized into named blocks; `--blocks` selects one and `--list` reports the array size it needs. The expensive blocks are meant for a job array rather than a serial run — `scripts/vqe_seeds_array.sh` and `scripts/nnqs_seeds_array.sh` submit them, and `scripts/fetch_narval_results.sh` and `scripts/fetch_fir_results.sh` bring the results back.
 
 MonarQ hardware runs (`src/vqe.py`'s `evaluate_on_device`) need real credentials and aren't a config-driven sweep — see `notebooks/05_monarq_hardware.ipynb` for the exact calls used.
 
