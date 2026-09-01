@@ -1,0 +1,908 @@
+{
+  "L": 2,
+  "h": 1.6,
+  "J": 1.0,
+  "n_layers": 1,
+  "method": "vqe_hardware_placement_epoch2",
+  "device": "monarq.default",
+  "arm": "default",
+  "pinned_wires": null,
+  "processing_config": "default",
+  "machine_name": "yamaska",
+  "boundary": "open",
+  "E0_exact": -3.3526109228480427,
+  "seed": 0,
+  "shots": 1000,
+  "n_repeats": 7,
+  "repeats": [
+    {
+      "repeat": 0,
+      "E0": -0.9983999999999998,
+      "terms": [
+        {
+          "term": "Z(0) @ Z(1)",
+          "wires": [
+            0,
+            1
+          ],
+          "device_wires": null,
+          "n_wires": 2,
+          "coeff": -1.0,
+          "expval": -0.04799999999999999
+        },
+        {
+          "term": "X(0)",
+          "wires": [
+            0
+          ],
+          "device_wires": null,
+          "n_wires": 1,
+          "coeff": -1.6,
+          "expval": -0.244
+        },
+        {
+          "term": "X(1)",
+          "wires": [
+            1
+          ],
+          "device_wires": null,
+          "n_wires": 1,
+          "coeff": -1.6,
+          "expval": 0.8979999999999999
+        }
+      ]
+    },
+    {
+      "repeat": 1,
+      "E0": -1.1696,
+      "terms": [
+        {
+          "term": "Z(0) @ Z(1)",
+          "wires": [
+            0,
+            1
+          ],
+          "device_wires": null,
+          "n_wires": 2,
+          "coeff": -1.0,
+          "expval": 0.08800000000000002
+        },
+        {
+          "term": "X(0)",
+          "wires": [
+            0
+          ],
+          "device_wires": null,
+          "n_wires": 1,
+          "coeff": -1.6,
+          "expval": -0.20999999999999996
+        },
+        {
+          "term": "X(1)",
+          "wires": [
+            1
+          ],
+          "device_wires": null,
+          "n_wires": 1,
+          "coeff": -1.6,
+          "expval": 0.8859999999999999
+        }
+      ]
+    },
+    {
+      "repeat": 2,
+      "E0": -1.0315999999999999,
+      "terms": [
+        {
+          "term": "Z(0) @ Z(1)",
+          "wires": [
+            0,
+            1
+          ],
+          "device_wires": null,
+          "n_wires": 2,
+          "coeff": -1.0,
+          "expval": -0.0020000000000000018
+        },
+        {
+          "term": "X(0)",
+          "wires": [
+            0
+          ],
+          "device_wires": null,
+          "n_wires": 1,
+          "coeff": -1.6,
+          "expval": -0.248
+        },
+        {
+          "term": "X(1)",
+          "wires": [
+            1
+          ],
+          "device_wires": null,
+          "n_wires": 1,
+          "coeff": -1.6,
+          "expval": 0.8939999999999999
+        }
+      ]
+    },
+    {
+      "repeat": 3,
+      "E0": -0.9668000000000003,
+      "terms": [
+        {
+          "term": "Z(0) @ Z(1)",
+          "wires": [
+            0,
+            1
+          ],
+          "device_wires": null,
+          "n_wires": 2,
+          "coeff": -1.0,
+          "expval": -0.05400000000000002
+        },
+        {
+          "term": "X(0)",
+          "wires": [
+            0
+          ],
+          "device_wires": null,
+          "n_wires": 1,
+          "coeff": -1.6,
+          "expval": -0.23199999999999998
+        },
+        {
+          "term": "X(1)",
+          "wires": [
+            1
+          ],
+          "device_wires": null,
+          "n_wires": 1,
+          "coeff": -1.6,
+          "expval": 0.8700000000000001
+        }
+      ]
+    },
+    {
+      "repeat": 4,
+      "E0": -1.242,
+      "terms": [
+        {
+          "term": "Z(0) @ Z(1)",
+          "wires": [
+            0,
+            1
+          ],
+          "device_wires": null,
+          "n_wires": 2,
+          "coeff": -1.0,
+          "expval": -0.053999999999999965
+        },
+        {
+          "term": "X(0)",
+          "wires": [
+            0
+          ],
+          "device_wires": null,
+          "n_wires": 1,
+          "coeff": -1.6,
+          "expval": -0.10600000000000004
+        },
+        {
+          "term": "X(1)",
+          "wires": [
+            1
+          ],
+          "device_wires": null,
+          "n_wires": 1,
+          "coeff": -1.6,
+          "expval": 0.9159999999999999
+        }
+      ]
+    },
+    {
+      "repeat": 5,
+      "E0": -1.0932,
+      "terms": [
+        {
+          "term": "Z(0) @ Z(1)",
+          "wires": [
+            0,
+            1
+          ],
+          "device_wires": null,
+          "n_wires": 2,
+          "coeff": -1.0,
+          "expval": -0.030000000000000027
+        },
+        {
+          "term": "X(0)",
+          "wires": [
+            0
+          ],
+          "device_wires": null,
+          "n_wires": 1,
+          "coeff": -1.6,
+          "expval": -0.18799999999999994
+        },
+        {
+          "term": "X(1)",
+          "wires": [
+            1
+          ],
+          "device_wires": null,
+          "n_wires": 1,
+          "coeff": -1.6,
+          "expval": 0.8899999999999999
+        }
+      ]
+    },
+    {
+      "repeat": 6,
+      "E0": -1.1756,
+      "terms": [
+        {
+          "term": "Z(0) @ Z(1)",
+          "wires": [
+            0,
+            1
+          ],
+          "device_wires": null,
+          "n_wires": 2,
+          "coeff": -1.0,
+          "expval": -0.03400000000000003
+        },
+        {
+          "term": "X(0)",
+          "wires": [
+            0
+          ],
+          "device_wires": null,
+          "n_wires": 1,
+          "coeff": -1.6,
+          "expval": -0.14399999999999996
+        },
+        {
+          "term": "X(1)",
+          "wires": [
+            1
+          ],
+          "device_wires": null,
+          "n_wires": 1,
+          "coeff": -1.6,
+          "expval": 0.8999999999999999
+        }
+      ]
+    }
+  ],
+  "wall_time_s": 164.44283004198223,
+  "submitted_at": "2026-08-31T03:12:19.030108+00:00",
+  "calibration": {
+    "machine": "yamaska",
+    "pulled_at": "2026-08-31T03:09:34.585022+00:00",
+    "qubits": {
+      "0": {
+        "parallelReadoutState0Fidelity": 0,
+        "parallelReadoutState0FidelityErr": 0,
+        "parallelReadoutState1Fidelity": 0,
+        "parallelReadoutState1FidelityErr": 0,
+        "parallelSingleQubitGateFidelity": 0,
+        "parallelSingleQubitGateFidelityErr": 0,
+        "readoutState0Fidelity": 0,
+        "readoutState0FidelityErr": 0,
+        "readoutState1Fidelity": 0,
+        "readoutState1FidelityErr": 0,
+        "singleQubitGateFidelity": 0,
+        "singleQubitGateFidelityErr": 0,
+        "t1": 0,
+        "t1Err": 0,
+        "t2Echo": 0,
+        "t2EchoErr": 0,
+        "t2Ramsey": 0,
+        "t2RamseyErr": 0
+      },
+      "1": {
+        "parallelReadoutState0Fidelity": 0,
+        "parallelReadoutState0FidelityErr": 0,
+        "parallelReadoutState1Fidelity": 0,
+        "parallelReadoutState1FidelityErr": 0,
+        "parallelSingleQubitGateFidelity": 0,
+        "parallelSingleQubitGateFidelityErr": 0,
+        "readoutState0Fidelity": 0,
+        "readoutState0FidelityErr": 0,
+        "readoutState1Fidelity": 0,
+        "readoutState1FidelityErr": 0,
+        "singleQubitGateFidelity": 0,
+        "singleQubitGateFidelityErr": 0,
+        "t1": 0,
+        "t1Err": 0,
+        "t2Echo": 0,
+        "t2EchoErr": 0,
+        "t2Ramsey": 0,
+        "t2RamseyErr": 0
+      },
+      "10": {
+        "parallelReadoutState0Fidelity": 0.965,
+        "parallelReadoutState0FidelityErr": 0.005811626278418119,
+        "parallelReadoutState1Fidelity": 0.818,
+        "parallelReadoutState1FidelityErr": 0.01220147532063234,
+        "parallelSingleQubitGateFidelity": 0.9860747706659659,
+        "parallelSingleQubitGateFidelityErr": 0.0009997709969164974,
+        "readoutState0Fidelity": 0.95,
+        "readoutState0FidelityErr": 0.006892024376045114,
+        "readoutState1Fidelity": 0.884,
+        "readoutState1FidelityErr": 0.010126401137620413,
+        "singleQubitGateFidelity": 0.9940907522409194,
+        "singleQubitGateFidelityErr": 0.0004213782789786381,
+        "t1": 7.883200000000004e-06,
+        "t1Err": 1.4040108584532918e-06,
+        "t2Echo": 3.799245130248267e-06,
+        "t2EchoErr": 8.621949034086117e-07,
+        "t2Ramsey": 1.3069241960606175e-06,
+        "t2RamseyErr": 9.570300728684935e-07
+      },
+      "11": {
+        "parallelReadoutState0Fidelity": 0.969,
+        "parallelReadoutState0FidelityErr": 0.005480784615363026,
+        "parallelReadoutState1Fidelity": 0.79,
+        "parallelReadoutState1FidelityErr": 0.01288021738946979,
+        "parallelSingleQubitGateFidelity": 0.994848210787047,
+        "parallelSingleQubitGateFidelityErr": 0.0013331297421089695,
+        "readoutState0Fidelity": 0.972,
+        "readoutState0FidelityErr": 0.005216895628628201,
+        "readoutState1Fidelity": 0.81,
+        "readoutState1FidelityErr": 0.012405643876881197,
+        "singleQubitGateFidelity": 0.9946804500691038,
+        "singleQubitGateFidelityErr": 0.0011074290701146626,
+        "t1": 6.614755863928247e-06,
+        "t1Err": 9.47133521967463e-07,
+        "t2Echo": 2.0101943518793093e-06,
+        "t2EchoErr": 5.714867303400143e-07,
+        "t2Ramsey": 1.160934925487505e-06,
+        "t2RamseyErr": 8.090065163840277e-07
+      },
+      "12": {
+        "parallelReadoutState0Fidelity": 0.968,
+        "parallelReadoutState0FidelityErr": 0.005565608681896351,
+        "parallelReadoutState1Fidelity": 0.837,
+        "parallelReadoutState1FidelityErr": 0.011680368144883107,
+        "parallelSingleQubitGateFidelity": 0.991385695075251,
+        "parallelSingleQubitGateFidelityErr": 0.0021147167176179455,
+        "readoutState0Fidelity": 0.979,
+        "readoutState0FidelityErr": 0.00453420334788814,
+        "readoutState1Fidelity": 0.86,
+        "readoutState1FidelityErr": 0.010972693379476163,
+        "singleQubitGateFidelity": 0.9933551179294291,
+        "singleQubitGateFidelityErr": 0.0011521536363246403,
+        "t1": 2.65476989567825e-06,
+        "t1Err": 1.004286279752817e-07,
+        "t2Echo": 1.6728706386940399e-06,
+        "t2EchoErr": 4.161747759496326e-07,
+        "t2Ramsey": 1.2043865089759364e-06,
+        "t2RamseyErr": 4.228789678718939e-07
+      },
+      "13": {
+        "parallelReadoutState0Fidelity": 0.929,
+        "parallelReadoutState0FidelityErr": 0.008121514637061239,
+        "parallelReadoutState1Fidelity": 0.851,
+        "parallelReadoutState1FidelityErr": 0.011260506205317771,
+        "parallelSingleQubitGateFidelity": 0.9823762076244683,
+        "parallelSingleQubitGateFidelityErr": 0.0037413000038334565,
+        "readoutState0Fidelity": 0.909,
+        "readoutState0FidelityErr": 0.009094998625618366,
+        "readoutState1Fidelity": 0.897,
+        "readoutState1FidelityErr": 0.009612023720320294,
+        "singleQubitGateFidelity": 0.9969151245856864,
+        "singleQubitGateFidelityErr": 0.00038883885089933685,
+        "t1": 8.592936383018736e-06,
+        "t1Err": 1.687234327142661e-06,
+        "t2Echo": 3.1604645812849806e-06,
+        "t2EchoErr": 8.797350236335002e-07,
+        "t2Ramsey": 1.5191549598703803e-06,
+        "t2RamseyErr": 5.894080590550399e-07
+      },
+      "14": {
+        "parallelReadoutState0Fidelity": 0.937,
+        "parallelReadoutState0FidelityErr": 0.007683163410991592,
+        "parallelReadoutState1Fidelity": 0.833,
+        "parallelReadoutState1FidelityErr": 0.01179453263168999,
+        "parallelSingleQubitGateFidelity": 0.9907837261959168,
+        "parallelSingleQubitGateFidelityErr": 0.0008595931167825037,
+        "readoutState0Fidelity": 0.95,
+        "readoutState0FidelityErr": 0.006892024376045114,
+        "readoutState1Fidelity": 0.891,
+        "readoutState1FidelityErr": 0.009854897259738428,
+        "singleQubitGateFidelity": 0.9933348185629123,
+        "singleQubitGateFidelityErr": 0.0006455513650911758,
+        "t1": 8.33275650256856e-06,
+        "t1Err": 9.544101640120572e-07,
+        "t2Echo": 1.6859720935676884e-06,
+        "t2EchoErr": 4.4687904087576134e-07,
+        "t2Ramsey": 4.46739874688342e-07,
+        "t2RamseyErr": 3.1295640217278063e-07
+      },
+      "15": {
+        "parallelReadoutState0Fidelity": 0,
+        "parallelReadoutState0FidelityErr": 0,
+        "parallelReadoutState1Fidelity": 0,
+        "parallelReadoutState1FidelityErr": 0,
+        "parallelSingleQubitGateFidelity": 0,
+        "parallelSingleQubitGateFidelityErr": 0,
+        "readoutState0Fidelity": 0,
+        "readoutState0FidelityErr": 0,
+        "readoutState1Fidelity": 0,
+        "readoutState1FidelityErr": 0,
+        "singleQubitGateFidelity": 0,
+        "singleQubitGateFidelityErr": 0,
+        "t1": 0,
+        "t1Err": 0,
+        "t2Echo": 0,
+        "t2EchoErr": 0,
+        "t2Ramsey": 0,
+        "t2RamseyErr": 0
+      },
+      "16": {
+        "parallelReadoutState0Fidelity": 0,
+        "parallelReadoutState0FidelityErr": 0,
+        "parallelReadoutState1Fidelity": 0,
+        "parallelReadoutState1FidelityErr": 0,
+        "parallelSingleQubitGateFidelity": 0,
+        "parallelSingleQubitGateFidelityErr": 0,
+        "readoutState0Fidelity": 0,
+        "readoutState0FidelityErr": 0,
+        "readoutState1Fidelity": 0,
+        "readoutState1FidelityErr": 0,
+        "singleQubitGateFidelity": 0,
+        "singleQubitGateFidelityErr": 0,
+        "t1": 0,
+        "t1Err": 0,
+        "t2Echo": 0,
+        "t2EchoErr": 0,
+        "t2Ramsey": 0,
+        "t2RamseyErr": 0
+      },
+      "17": {
+        "parallelReadoutState0Fidelity": 0,
+        "parallelReadoutState0FidelityErr": 0,
+        "parallelReadoutState1Fidelity": 0,
+        "parallelReadoutState1FidelityErr": 0,
+        "parallelSingleQubitGateFidelity": 0,
+        "parallelSingleQubitGateFidelityErr": 0,
+        "readoutState0Fidelity": 0,
+        "readoutState0FidelityErr": 0,
+        "readoutState1Fidelity": 0,
+        "readoutState1FidelityErr": 0,
+        "singleQubitGateFidelity": 0,
+        "singleQubitGateFidelityErr": 0,
+        "t1": 0,
+        "t1Err": 0,
+        "t2Echo": 0,
+        "t2EchoErr": 0,
+        "t2Ramsey": 0,
+        "t2RamseyErr": 0
+      },
+      "18": {
+        "parallelReadoutState0Fidelity": 0,
+        "parallelReadoutState0FidelityErr": 0,
+        "parallelReadoutState1Fidelity": 0,
+        "parallelReadoutState1FidelityErr": 0,
+        "parallelSingleQubitGateFidelity": 0,
+        "parallelSingleQubitGateFidelityErr": 0,
+        "readoutState0Fidelity": 0,
+        "readoutState0FidelityErr": 0,
+        "readoutState1Fidelity": 0,
+        "readoutState1FidelityErr": 0,
+        "singleQubitGateFidelity": 0,
+        "singleQubitGateFidelityErr": 0,
+        "t1": 0,
+        "t1Err": 0,
+        "t2Echo": 0,
+        "t2EchoErr": 0,
+        "t2Ramsey": 0,
+        "t2RamseyErr": 0
+      },
+      "19": {
+        "parallelReadoutState0Fidelity": 0,
+        "parallelReadoutState0FidelityErr": 0,
+        "parallelReadoutState1Fidelity": 0,
+        "parallelReadoutState1FidelityErr": 0,
+        "parallelSingleQubitGateFidelity": 0,
+        "parallelSingleQubitGateFidelityErr": 0,
+        "readoutState0Fidelity": 0,
+        "readoutState0FidelityErr": 0,
+        "readoutState1Fidelity": 0,
+        "readoutState1FidelityErr": 0,
+        "singleQubitGateFidelity": 0,
+        "singleQubitGateFidelityErr": 0,
+        "t1": 0,
+        "t1Err": 0,
+        "t2Echo": 0,
+        "t2EchoErr": 0,
+        "t2Ramsey": 0,
+        "t2RamseyErr": 0
+      },
+      "2": {
+        "parallelReadoutState0Fidelity": 0,
+        "parallelReadoutState0FidelityErr": 0,
+        "parallelReadoutState1Fidelity": 0,
+        "parallelReadoutState1FidelityErr": 0,
+        "parallelSingleQubitGateFidelity": 0,
+        "parallelSingleQubitGateFidelityErr": 0,
+        "readoutState0Fidelity": 0,
+        "readoutState0FidelityErr": 0,
+        "readoutState1Fidelity": 0,
+        "readoutState1FidelityErr": 0,
+        "singleQubitGateFidelity": 0,
+        "singleQubitGateFidelityErr": 0,
+        "t1": 0,
+        "t1Err": 0,
+        "t2Echo": 0,
+        "t2EchoErr": 0,
+        "t2Ramsey": 0,
+        "t2RamseyErr": 0
+      },
+      "20": {
+        "parallelReadoutState0Fidelity": 0,
+        "parallelReadoutState0FidelityErr": 0,
+        "parallelReadoutState1Fidelity": 0,
+        "parallelReadoutState1FidelityErr": 0,
+        "parallelSingleQubitGateFidelity": 0,
+        "parallelSingleQubitGateFidelityErr": 0,
+        "readoutState0Fidelity": 0,
+        "readoutState0FidelityErr": 0,
+        "readoutState1Fidelity": 0,
+        "readoutState1FidelityErr": 0,
+        "singleQubitGateFidelity": 0,
+        "singleQubitGateFidelityErr": 0,
+        "t1": 0,
+        "t1Err": 0,
+        "t2Echo": 0,
+        "t2EchoErr": 0,
+        "t2Ramsey": 0,
+        "t2RamseyErr": 0
+      },
+      "21": {
+        "parallelReadoutState0Fidelity": 0,
+        "parallelReadoutState0FidelityErr": 0,
+        "parallelReadoutState1Fidelity": 0,
+        "parallelReadoutState1FidelityErr": 0,
+        "parallelSingleQubitGateFidelity": 0,
+        "parallelSingleQubitGateFidelityErr": 0,
+        "readoutState0Fidelity": 0,
+        "readoutState0FidelityErr": 0,
+        "readoutState1Fidelity": 0,
+        "readoutState1FidelityErr": 0,
+        "singleQubitGateFidelity": 0,
+        "singleQubitGateFidelityErr": 0,
+        "t1": 0,
+        "t1Err": 0,
+        "t2Echo": 0,
+        "t2EchoErr": 0,
+        "t2Ramsey": 0,
+        "t2RamseyErr": 0
+      },
+      "22": {
+        "parallelReadoutState0Fidelity": 0,
+        "parallelReadoutState0FidelityErr": 0,
+        "parallelReadoutState1Fidelity": 0,
+        "parallelReadoutState1FidelityErr": 0,
+        "parallelSingleQubitGateFidelity": 0,
+        "parallelSingleQubitGateFidelityErr": 0,
+        "readoutState0Fidelity": 0,
+        "readoutState0FidelityErr": 0,
+        "readoutState1Fidelity": 0,
+        "readoutState1FidelityErr": 0,
+        "singleQubitGateFidelity": 0,
+        "singleQubitGateFidelityErr": 0,
+        "t1": 0,
+        "t1Err": 0,
+        "t2Echo": 0,
+        "t2EchoErr": 0,
+        "t2Ramsey": 0,
+        "t2RamseyErr": 0
+      },
+      "23": {
+        "parallelReadoutState0Fidelity": 0,
+        "parallelReadoutState0FidelityErr": 0,
+        "parallelReadoutState1Fidelity": 0,
+        "parallelReadoutState1FidelityErr": 0,
+        "parallelSingleQubitGateFidelity": 0,
+        "parallelSingleQubitGateFidelityErr": 0,
+        "readoutState0Fidelity": 0,
+        "readoutState0FidelityErr": 0,
+        "readoutState1Fidelity": 0,
+        "readoutState1FidelityErr": 0,
+        "singleQubitGateFidelity": 0,
+        "singleQubitGateFidelityErr": 0,
+        "t1": 0,
+        "t1Err": 0,
+        "t2Echo": 0,
+        "t2EchoErr": 0,
+        "t2Ramsey": 0,
+        "t2RamseyErr": 0
+      },
+      "3": {
+        "parallelReadoutState0Fidelity": 0,
+        "parallelReadoutState0FidelityErr": 0,
+        "parallelReadoutState1Fidelity": 0,
+        "parallelReadoutState1FidelityErr": 0,
+        "parallelSingleQubitGateFidelity": 0,
+        "parallelSingleQubitGateFidelityErr": 0,
+        "readoutState0Fidelity": 0,
+        "readoutState0FidelityErr": 0,
+        "readoutState1Fidelity": 0,
+        "readoutState1FidelityErr": 0,
+        "singleQubitGateFidelity": 0,
+        "singleQubitGateFidelityErr": 0,
+        "t1": 0,
+        "t1Err": 0,
+        "t2Echo": 0,
+        "t2EchoErr": 0,
+        "t2Ramsey": 0,
+        "t2RamseyErr": 0
+      },
+      "4": {
+        "parallelReadoutState0Fidelity": 0,
+        "parallelReadoutState0FidelityErr": 0,
+        "parallelReadoutState1Fidelity": 0,
+        "parallelReadoutState1FidelityErr": 0,
+        "parallelSingleQubitGateFidelity": 0,
+        "parallelSingleQubitGateFidelityErr": 0,
+        "readoutState0Fidelity": 0,
+        "readoutState0FidelityErr": 0,
+        "readoutState1Fidelity": 0,
+        "readoutState1FidelityErr": 0,
+        "singleQubitGateFidelity": 0,
+        "singleQubitGateFidelityErr": 0,
+        "t1": 0,
+        "t1Err": 0,
+        "t2Echo": 0,
+        "t2EchoErr": 0,
+        "t2Ramsey": 0,
+        "t2RamseyErr": 0
+      },
+      "5": {
+        "parallelReadoutState0Fidelity": 0,
+        "parallelReadoutState0FidelityErr": 0,
+        "parallelReadoutState1Fidelity": 0,
+        "parallelReadoutState1FidelityErr": 0,
+        "parallelSingleQubitGateFidelity": 0,
+        "parallelSingleQubitGateFidelityErr": 0,
+        "readoutState0Fidelity": 0,
+        "readoutState0FidelityErr": 0,
+        "readoutState1Fidelity": 0,
+        "readoutState1FidelityErr": 0,
+        "singleQubitGateFidelity": 0,
+        "singleQubitGateFidelityErr": 0,
+        "t1": 0,
+        "t1Err": 0,
+        "t2Echo": 0,
+        "t2EchoErr": 0,
+        "t2Ramsey": 0,
+        "t2RamseyErr": 0
+      },
+      "6": {
+        "parallelReadoutState0Fidelity": 0,
+        "parallelReadoutState0FidelityErr": 0,
+        "parallelReadoutState1Fidelity": 0,
+        "parallelReadoutState1FidelityErr": 0,
+        "parallelSingleQubitGateFidelity": 0,
+        "parallelSingleQubitGateFidelityErr": 0,
+        "readoutState0Fidelity": 0,
+        "readoutState0FidelityErr": 0,
+        "readoutState1Fidelity": 0,
+        "readoutState1FidelityErr": 0,
+        "singleQubitGateFidelity": 0,
+        "singleQubitGateFidelityErr": 0,
+        "t1": 0,
+        "t1Err": 0,
+        "t2Echo": 0,
+        "t2EchoErr": 0,
+        "t2Ramsey": 0,
+        "t2RamseyErr": 0
+      },
+      "7": {
+        "parallelReadoutState0Fidelity": 0,
+        "parallelReadoutState0FidelityErr": 0,
+        "parallelReadoutState1Fidelity": 0,
+        "parallelReadoutState1FidelityErr": 0,
+        "parallelSingleQubitGateFidelity": 0,
+        "parallelSingleQubitGateFidelityErr": 0,
+        "readoutState0Fidelity": 0,
+        "readoutState0FidelityErr": 0,
+        "readoutState1Fidelity": 0,
+        "readoutState1FidelityErr": 0,
+        "singleQubitGateFidelity": 0,
+        "singleQubitGateFidelityErr": 0,
+        "t1": 0,
+        "t1Err": 0,
+        "t2Echo": 0,
+        "t2EchoErr": 0,
+        "t2Ramsey": 0,
+        "t2RamseyErr": 0
+      },
+      "8": {
+        "parallelReadoutState0Fidelity": 0,
+        "parallelReadoutState0FidelityErr": 0,
+        "parallelReadoutState1Fidelity": 0,
+        "parallelReadoutState1FidelityErr": 0,
+        "parallelSingleQubitGateFidelity": 0,
+        "parallelSingleQubitGateFidelityErr": 0,
+        "readoutState0Fidelity": 0,
+        "readoutState0FidelityErr": 0,
+        "readoutState1Fidelity": 0,
+        "readoutState1FidelityErr": 0,
+        "singleQubitGateFidelity": 0,
+        "singleQubitGateFidelityErr": 0,
+        "t1": 0,
+        "t1Err": 0,
+        "t2Echo": 0,
+        "t2EchoErr": 0,
+        "t2Ramsey": 0,
+        "t2RamseyErr": 0
+      },
+      "9": {
+        "parallelReadoutState0Fidelity": 0.975,
+        "parallelReadoutState0FidelityErr": 0.004937104414532877,
+        "parallelReadoutState1Fidelity": 0.841,
+        "parallelReadoutState1FidelityErr": 0.011563693181678596,
+        "parallelSingleQubitGateFidelity": 0.9926921987045757,
+        "parallelSingleQubitGateFidelityErr": 0.0009656268672624226,
+        "readoutState0Fidelity": 0.973,
+        "readoutState0FidelityErr": 0.005125524363418832,
+        "readoutState1Fidelity": 0.902,
+        "readoutState1FidelityErr": 0.009401914698613255,
+        "singleQubitGateFidelity": 0.9964657852346839,
+        "singleQubitGateFidelityErr": 0.0002902708033367532,
+        "t1": 7.1067785192698266e-06,
+        "t1Err": 2.2169806672807126e-06,
+        "t2Echo": 2.7968582270868133e-06,
+        "t2EchoErr": 6.948158401854736e-07,
+        "t2Ramsey": 1.1397484201443318e-06,
+        "t2RamseyErr": 4.3656650151828057e-07
+      }
+    },
+    "couplers": {
+      "0": {
+        "czGateFidelity": 0,
+        "czGateFidelityErr": 0
+      },
+      "1": {
+        "czGateFidelity": 0,
+        "czGateFidelityErr": 0
+      },
+      "10": {
+        "czGateFidelity": 0,
+        "czGateFidelityErr": 0
+      },
+      "11": {
+        "czGateFidelity": 0,
+        "czGateFidelityErr": 0
+      },
+      "12": {
+        "czGateFidelity": 0,
+        "czGateFidelityErr": 0
+      },
+      "13": {
+        "czGateFidelity": 0,
+        "czGateFidelityErr": 0
+      },
+      "14": {
+        "czGateFidelity": 0,
+        "czGateFidelityErr": 0
+      },
+      "15": {
+        "czGateFidelity": 0.9213411382142203,
+        "czGateFidelityErr": 0.0024381975443038377
+      },
+      "16": {
+        "czGateFidelity": 0.9135901713922866,
+        "czGateFidelityErr": 0.004388676349383438
+      },
+      "17": {
+        "czGateFidelity": 1.0521933968628567,
+        "czGateFidelityErr": -0.0026801500765511865
+      },
+      "18": {
+        "czGateFidelity": 0.9694961476448436,
+        "czGateFidelityErr": 0.0008924088719867058
+      },
+      "19": {
+        "czGateFidelity": 0.9458713825763202,
+        "czGateFidelityErr": 0.0019971568198805783
+      },
+      "2": {
+        "czGateFidelity": 0,
+        "czGateFidelityErr": 0
+      },
+      "20": {
+        "czGateFidelity": 0,
+        "czGateFidelityErr": 0
+      },
+      "21": {
+        "czGateFidelity": 0,
+        "czGateFidelityErr": 0
+      },
+      "22": {
+        "czGateFidelity": 0,
+        "czGateFidelityErr": 0
+      },
+      "23": {
+        "czGateFidelity": 0,
+        "czGateFidelityErr": 0
+      },
+      "24": {
+        "czGateFidelity": 0,
+        "czGateFidelityErr": 0
+      },
+      "25": {
+        "czGateFidelity": 0,
+        "czGateFidelityErr": 0
+      },
+      "26": {
+        "czGateFidelity": 0,
+        "czGateFidelityErr": 0
+      },
+      "27": {
+        "czGateFidelity": 0,
+        "czGateFidelityErr": 0
+      },
+      "28": {
+        "czGateFidelity": 0,
+        "czGateFidelityErr": 0
+      },
+      "29": {
+        "czGateFidelity": 0,
+        "czGateFidelityErr": 0
+      },
+      "3": {
+        "czGateFidelity": 0,
+        "czGateFidelityErr": 0
+      },
+      "30": {
+        "czGateFidelity": 0,
+        "czGateFidelityErr": 0
+      },
+      "31": {
+        "czGateFidelity": 0,
+        "czGateFidelityErr": 0
+      },
+      "32": {
+        "czGateFidelity": 0,
+        "czGateFidelityErr": 0
+      },
+      "33": {
+        "czGateFidelity": 0,
+        "czGateFidelityErr": 0
+      },
+      "34": {
+        "czGateFidelity": 0,
+        "czGateFidelityErr": 0
+      },
+      "4": {
+        "czGateFidelity": 0,
+        "czGateFidelityErr": 0
+      },
+      "5": {
+        "czGateFidelity": 0,
+        "czGateFidelityErr": 0
+      },
+      "6": {
+        "czGateFidelity": 0,
+        "czGateFidelityErr": 0
+      },
+      "7": {
+        "czGateFidelity": 0,
+        "czGateFidelityErr": 0
+      },
+      "8": {
+        "czGateFidelity": 0,
+        "czGateFidelityErr": 0
+      },
+      "9": {
+        "czGateFidelity": 0,
+        "czGateFidelityErr": 0
+      }
+    }
+  }
+}

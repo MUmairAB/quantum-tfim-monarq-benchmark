@@ -1,0 +1,17 @@
+{
+  "L": 16,
+  "h": 0.4,
+  "J": 1.0,
+  "E0": -14.681416238161875,
+  "E0_exact": -15.728378620326387,
+  "rel_error": 0.06656518179257731,
+  "method": "vqe_seed_ensemble",
+  "boundary": "open",
+  "two_qubit_gate_count": 150,
+  "wall_time_s": 79.89556809701025,
+  "n_layers": 10,
+  "n_steps": 600,
+  "stepsize": 0.1,
+  "seed": 44,
+  "device": "lightning.qubit"
+}

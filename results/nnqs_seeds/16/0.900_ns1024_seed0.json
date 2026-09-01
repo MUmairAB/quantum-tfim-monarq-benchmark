@@ -1,0 +1,19 @@
+{
+  "L": 16,
+  "h": 0.9,
+  "J": 1.0,
+  "E0": -18.95711407952351,
+  "E0_mc_error": 0.0039001574803062622,
+  "E0_exact": -18.955678587087977,
+  "rel_error": 7.572888667308937e-05,
+  "signed_error": -0.0014354924355330922,
+  "method": "nnqs_seed_ensemble",
+  "boundary": "open",
+  "wall_time_s": 71.63152465084568,
+  "alpha": 2,
+  "n_samples": 1024,
+  "n_iter": 300,
+  "learning_rate": 0.02,
+  "diag_shift": 0.01,
+  "seed": 0
+}
